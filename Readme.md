@@ -1,8 +1,12 @@
 # DriveClonrPro
+The BEST way to clone your Google Drive files to your computer.
 ## About DriveClonrPro
-Alas! The successor to the absolute mess of a codebase known as DriveClonr. Oh, and it has a GUI now ^_^. DriveClonr was a MESS due to the timecrunch I built it under; I found a bug with how I was using the NextPageTokens and fixing it required a lot of code rewriting. Since my school Google Drive was at risk of being disabled at any moment, I took the lazy approach and wrote really basic patches to get by.... patches that remain to this day. I had plans to fix DriveClonr but never got around to it, until now! 
+Alas! The successor to the absolute mess of a codebase known as DriveClonr has emerged! Oh, and it has a GUI now ^_^. DriveClonr was a MESS due to the timecrunch I built it under; Long story short I found a bug with how I was using the NextPageTokens and fixing it required a lot of code rewriting. Since my school Google Drive was at risk of being disabled at any moment, I took the lazy approach and wrote really basic patches to get by.... patches that remain to this day. I had plans to fix DriveClonr but never got around to it, until now! 
 
-DriveClonrPro is a new take on the DriveClonr legacy, adding a GUI, proper OOP design, and a lot of other cool stuff. It's still in development, but it's already a lot better than DriveClonr.
+DriveClonrPro is a new take on the DriveClonr legacy, adding a GUI, proper OOP design, and a lot of other cool stuff. It's still in development, but it's already a lot better (and more importantly, stable) than DriveClonr.
+
+## What happened to the `e` in DriveClon(e)rPro?
+Simply put, Clonr looks cooler than Cloner. This was a decision made late at night one faithful day during the original development of DriveClonr, and I'm sticking with it.
 
 ## Key differences between DriveClonr and DriveClonrPro
 1. DriveClonrPro uses Tkinter to create a basic GUI for the user to interact with. This makes it a lot easier to use than DriveClonr, which required the user to interact with the program through the terminal. I would've used PyQT5, but I've had trouble getting that to work on macOS, so I decided to go with Tkinter instead.
@@ -21,29 +25,38 @@ Coming Soon: A proper TreeView widget that allows the user to select which folde
 ### Prerequisites
 1. Python 3.9 or higher (I personally test this with Python 3.9.13, but it should work with any version of Python 3.9 or higher)
 2. The Google Drive API Python Library (Install with `pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib`)
-3. Valid Google Drive API Credentials (See [this page](https://developers.google.com/workspace/guides/create-credentials) for more information on how to get these. This application requires OAuth 2.0 credentials, so make sure you create a JSON file with the credentials and place it in the same directory as the program. The code assumes the file is called `creds.json` but you can change this in the code if you want to.)
-4. A Drive you want to clone! 
+3. Anything else in `requirements.txt` (Install with `pip install -r requirements.txt`)
+4. Valid Google Drive API Credentials (See [this page](https://developers.google.com/workspace/guides/create-credentials) for more information on how to get these. This application requires OAuth 2.0 credentials, so make sure you create a JSON file with the credentials and place it in the same directory as the program. The code assumes the file is called `creds.json` but you can change this in the code if you want to.)
+5. A Google Drive account with files to clone (duh)
 
 ### Installation
 1. Download precompiled binaries (if they exist) or clone this repository to your computer. Make sure to install dependencies (see `requirements.txt`) if you're cloning the repository.
 2. Place your `creds.json` file in the same directory as the program.
 3. Run `MainWindow.py` and follow the instructions on screen. It's that simple! 
 
+## How does DriveClonrPro work?
+Simply put, I treat the Google Drive file structure like a massive tree and recurse through it using Postorder traversal, creating each folder as I recurse deeper. This would normally be a fast process, however each level of recursion requires a new call to the Google Drive API which slows down the process. 
+
+I'm not sure why I chose postorder traversal, but it works so I'm not complaining :shrug:. In hindsight I should've used in-order traversal, but if it works, it works.
+
 ## Known Issues
 1. DriveClonrPro does not check for ample space before cloning. This is something I aim to rectify in the future.
-2. Any exception within the Google Drive API will cause DriveClonrPro to crash. This is something I aim to rectify in the future.
+2. Any exception within the Google Drive API (or anywhere else, for that matter) will cause DriveClonrPro to crash. This is something I aim to rectify in the future.
 3. Tkinter seems to not like the cloning screen; The layout of the objects moves around a lot when the length of the file name changes. This is something I aim to rectify in the future.
 
 ## Features:
 
 1. Auto LongFilePaths enabler on Windows
-    To avoid complex file-path size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit.
+    To avoid complex file-path size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit (Unix go brrr). 
 
 2. Unmatched Google Workspace Support
     New with DriveClonrPro is the ability to specify what each type of Google Workspace document is converted to. For example, you can choose to convert all Google Docs to Microsoft Word documents and all Google Sheets to PDF documents. Unlike the legacy DriveClonr, you're no longer stuck with either-or. 
 
 3. Direct-Download. 
-    Unlike manually selecting files from Google Drive, DriveClonrPro directly downloads the files from Google Drive without the need for a compression intermediary. This means that you don't have to worry about Google Drive's download limits - And also get instant access to your files :P
+    Unlike manually selecting files from Google Drive, DriveClonrPro directly downloads the files from Google Drive without the need for a compression intermediary (like .zip). This means that you don't have to worry about Google Drive's download limits - And also get instant access to your files :P
+
+4. Cross-platform
+    A feature completely in the control of Tkinter and Python, I'm taking credit for it regardless :P. DriveClonrPro is cross-platform, meaning it works on Windows, macOS, and Linux. Granted, I've only tested it on Windows, but by PSMI (Pure Software MagIc™) it should work on macOS and Linux as well.
 
 ## Planned Features:
 
@@ -61,3 +74,12 @@ Coming Soon: A proper TreeView widget that allows the user to select which folde
 
 5. Better Space Checking
     Currently, DriveClonrPro does not check for ample space before cloning. This is something I aim to fix in the future.
+
+6. Google Photos Cloning Support
+    If you're anything like me, you love having offline backups of your photos. At some point, I'd like to add support for cloning Google Photos to DriveClonrPro - This will definitely tie into the multithreading feature.
+
+7. More Personalized UI
+    I am lazy, and as such did not utilize the Google People API in this application at all. At some point, I'd like to utilize this API to make the UI more personalized to the user (i.e, name, profile picture, etc.)
+
+8. Dealing with files too large to be exported with the API
+    Some files don't like to be exported with the Google Drive API. I'm not sure why Google doesn't allow this, but it's something I'd like to remedy in the future to maintain the 1:1 clone. 
