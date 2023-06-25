@@ -41,6 +41,7 @@ class AccountSelector(ttk.Frame):
             fail_text = ttk.Label(self, text="Hmm, that didn't seem to work. Try again.", font=("Helvetica", 12, "bold"), foreground="red")
             fail_text.pack()
             return
-        self.service = build('drive', 'v3', credentials=creds)
+        DISCOVERY_SERVICE_URL = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
+        self.service = build('drive', 'v3', credentials=creds, discoveryServiceUrl=DISCOVERY_SERVICE_URL)
         self.destroy()
         ConfigWindow(self.parent, self.service).pack()

@@ -32,3 +32,28 @@ Coming Soon: A proper TreeView widget that allows the user to select which folde
 ## Known Issues
 1. DriveClonrPro does not check for ample space before cloning. This is something I aim to rectify in the future.
 2. Any exception within the Google Drive API will cause DriveClonrPro to crash. This is something I aim to rectify in the future.
+3. Tkinter seems to not like the cloning screen; The layout of the objects moves around a lot when the length of the file name changes. This is something I aim to rectify in the future.
+
+## Features:
+
+1. Auto LongFilePaths enabler on Windows
+    To avoid complex file-name size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit.
+
+2. Unmatched Google Workspace Support
+    New with DriveClonrPro is the ability to specify what each type of Google Workspace document is converted to. For example, you can choose to convert all Google Docs to Microsoft Word documents and all Google Sheets to PDF documents. Unlike the legacy DriveClonr, you're no longer stuck with either-or. 
+## Planned Features:
+
+1. Multithreading
+    DriveClonrPro will be multithreaded, allowing it to clone multiple files at once. This will make the cloning process a lot faster. This feature is currently in development.
+
+2. TreeView Widget
+    DriveClonrPro will have a proper TreeView widget that allows the user to select which folders to clone. This feature is currently in development.
+
+3. Dark Mode
+    DriveClonrPro will have a dark mode - Like basically every other program nowadays. This feature is currently in development.
+
+4. Better Error Handling
+    Currently, DriveClonrPro will crash if any exception is thrown within the Google Drive API. This is something I aim to fix in the future.
+
+5. Better Space Checking
+    Currently, DriveClonrPro does not check for ample space before cloning. This is something I aim to fix in the future.

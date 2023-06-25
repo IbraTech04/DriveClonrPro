@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
@@ -119,19 +120,15 @@ class ConfigWindow(tk.Frame):
             try:
                 key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\FileSystem", 0, winreg.KEY_READ)
                 value, _ = winreg.QueryValueEx(key, "LongPathsEnabled")
-                if value != 1:
+                if value == 1:
                     # Make a warning saying "we need to change this"
                     tk.messagebox.showwarning("Warning", "Clonr needs to change a registry setting to work properly. (LongPathsEnabled) This requires UAC elevation. Please click OK to continue.")
                     # Run the file called disable-file-limit.reg
-                    os.system("regedit /s disable-file-limit.reg")
-                    tk.messagebox.showinfo("Success", "The registry setting has been changed successfully. In order for this setting to take effect, DrivClonr will do a soft-reboot of Windows Explorer. Your taskbar and desktop icons will disappear for a few seconds, then reappear. Please click OK to continue.")
-                    # Now we need to restart explroer.exe
-                    os.system("taskkill /f /im explorer.exe")
-                    os.system("start explorer.exe")
+                    os.system("disable-file-limit.reg")
+                    tk.messagebox.showinfo("Success", "The registry setting has been changed successfully! DriveClonr can continue.")              
             except FileNotFoundError:
                 pass
 
-        
         #Destroy all the widgets in the window
         widgets = self.parent.winfo_children()
         for widget in widgets:
