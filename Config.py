@@ -5,9 +5,6 @@ import os
 from ReadyToStart import ReadyToStart
 import winreg
 
-import ctypes
-import sys
-
 GOOGLE_WORKSPACE_MIMETYPES = {"Docs": "application/vnd.google-apps.document", "Sheets": "application/vnd.google-apps.spreadsheet", "Slides": "application/vnd.google-apps.presentation"}
 
 MIMETYPE_MAPPING = {"Word": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Excel": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "PowerPoint": "application/vnd.openxmlformats-officedocument.presentationml.presentation", "PDF": "application/pdf"}

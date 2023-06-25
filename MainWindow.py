@@ -7,7 +7,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 from EULAScreen import EULAView
-
+import os
 
 class MainWindow():
     """
@@ -57,6 +57,12 @@ class MainWindow():
         self.parent.geometry("350x350")
         self.parent.resizable(False, False)
         self.parent.title("DriveClonr 2023.7")
+        
+        # if a file called creds.json is not found in the same directory as the program, then the program will not run
+        if not os.path.exists("creds.json"):
+            tk.messagebox.showerror("Error", "creds.json not found. Please download it from the Google Cloud Console and place it in the same directory as this program.")
+            self.parent.destroy()
+            exit()
         
     def transition(self, frame: ttk.Frame) -> None:
         """
