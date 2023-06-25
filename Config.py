@@ -1,4 +1,3 @@
-import sys
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
@@ -7,8 +6,6 @@ from ReadyToStart import ReadyToStart
 import winreg
 
 GOOGLE_WORKSPACE_MIMETYPES = {"Docs": "application/vnd.google-apps.document", "Sheets": "application/vnd.google-apps.spreadsheet", "Slides": "application/vnd.google-apps.presentation"}
-
-MIMETYPE_MAPPING = {"Word": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Excel": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "PowerPoint": "application/vnd.openxmlformats-officedocument.presentationml.presentation", "PDF": "application/pdf"}
 
 class ConfigWindow(tk.Frame):
     """
@@ -34,12 +31,23 @@ class ConfigWindow(tk.Frame):
         self.my_drive_var = tk.BooleanVar()
         self.my_drive_checkbox = ttk.Checkbutton(self.info_frame, text="My Drive", variable=self.my_drive_var)
         self.my_drive_checkbox.pack()
+        
+        self.trashed = tk.BooleanVar()
+        self.trashed_checkbox = ttk.Checkbutton(self.info_frame, text="Trashed files", variable=self.trashed)
+        self.trashed_checkbox.pack()
+        
         self.shared_checkbox.pack()
+        
+        # Create a greyed out box for Google Photos - This is a feature coming soon
+        self.google_photos_var = tk.BooleanVar()
+        self.google_photos_checkbox = ttk.Checkbutton(self.info_frame, text="Google Photos", variable=self.google_photos_var, state=tk.DISABLED)
+        self.google_photos_checkbox.pack()
+        
         
         self.info_frame.pack(pady=10)
         
         # Chart with Google Workspace document types and export options
-        self.doc_frame = ttk.LabelFrame(self.parent, text="Google Workspace Documents")
+        self.doc_frame = ttk.LabelFrame(self.parent, text="Export Options")
         self.doc_frame.pack(pady=10)
 
         # Document type labels and export options
@@ -95,7 +103,7 @@ class ConfigWindow(tk.Frame):
             return
 
         # Step one and a half: Make sure the user has selected at least one of Shared with Me or My Drive
-        if not self.shared_var.get() and not self.my_drive_var.get():
+        if not self.shared_var.get() and not self.my_drive_var.get() and not self.trashed.get():
             tk.messagebox.showerror("Error", "Please select at least one of Shared with Me or My Drive.")
             return
 
@@ -111,7 +119,7 @@ class ConfigWindow(tk.Frame):
         # Finally, add the check status for Shared with Me and My Drive
         config["shared"] = self.shared_var.get()
         config["my_drive"] = self.my_drive_var.get()
-    
+        config["trashed"] = self.trashed.get()
         
         # Finally, check the registry for LongFilePathEnabled and set it to 1 if it's not already set
         # This is required for Windows to be able to create files with paths longer than 260 characters

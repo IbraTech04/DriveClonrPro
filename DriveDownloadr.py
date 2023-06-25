@@ -94,38 +94,44 @@ class DriveDownloadr(tk.Frame):
         """
         download_list = []
         if self.config['my_drive']:
-            download_list.append("'root' in parents")
+            download_list.append("'root' in parents and trashed = false")
         if self.config['shared']:
-            download_list.append("sharedWithMe")
+            download_list.append("sharedWithMe and trashed = false")
+        if self.config['trashed']:
+            download_list.append("trashed = true")
         
-        len_dict = {1: "one of one", 2: "one of two"}
-        name_dict = {"'root' in parents": "Your Files", "sharedWithMe": "Shared Files"}
-        self.stage['text'] = f"Stage {len_dict[len(download_list)]}: Downloading {name_dict[download_list[0]]}"
+        name_dict = {"'root' in parents and trashed = false": "Your Files", "sharedWithMe and trashed = false": "Shared Files", "trashed = true": "Trashed Files"}
         
         for i in range(len(download_list)):
             query = download_list[i]        
-            self.stage['text'] = f"Stage {len_dict[len(download_list)]}: Downloading {name_dict[download_list[i]]}"
+            self.stage['text'] = f"Stage {i + 1} of {len(download_list)}: Cloning {name_dict[download_list[i]]}"
             self.stage.update()
+            
+            # Make a folder in the destination directory corresponding to name_dict and download all the files in that folder
+            if not os.path.exists(f"{self.config['destination']}/{name_dict[download_list[i]]}"):
+                os.mkdir(f"{self.config['destination']}/{name_dict[download_list[i]]}")
+            current_dir = f"{self.config['destination']}/{name_dict[download_list[i]]}"
+            
             # Get a list of all the root folders
-            root_folders = self._make_request(f"mimeType = 'application/vnd.google-apps.folder' and {query} and trashed = false")
-            root_files = self._make_request(f"mimeType != 'application/vnd.google-apps.folder' and {query} and trashed = false")
+            root_folders = self._make_request(f"mimeType = 'application/vnd.google-apps.folder' and {query}")
+            root_files = self._make_request(f"mimeType != 'application/vnd.google-apps.folder' and {query}")
             for folder in root_folders:
                 folder_name = self._sanitize_filename(folder['name'])
                 self.current_file['text'] = f"Current File: {folder['name']}"
                 self.current_file.update()
-                if not os.path.exists(f"{self.config['destination']}/{folder_name}"):
-                    os.mkdir(f"{self.config['destination']}/{folder_name}")
+                if not os.path.exists(f"{current_dir}/{folder_name}"):
+                    os.mkdir(f"{current_dir}/{folder_name}")
                 folder_id = folder['id']
-                self._download(folder_id, f"{self.config['destination']}/{folder_name}")
+                self._download(folder_id, f"{current_dir}/{folder_name}")
             for file in root_files:
                 file_name = self._sanitize_filename(file['name'])
                 self.current_file['text'] = f"Current File: {file['name']}"
                 self.current_file.update()
                 extension = self.extensions.get(file['mimeType'], "")
-                if not os.path.exists(f"{self.config['destination']}/{file_name}{extension}"):
+                if not os.path.exists(f"{current_dir}/{file_name}{extension}"):
                     downloader = self.downloaders.get(file['mimeType'], self._download_normal)
                     fileio = downloader(file['id'])
-                    with open(f"{self.config['destination']}/{file_name}{extension}", 'wb') as f:
+                    with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
                         f.write(fileio.getvalue())
                         f.close()
         # If we're here, cloning is complete. Show the new screen
@@ -142,8 +148,8 @@ class DriveDownloadr(tk.Frame):
         """
     
         # Get a list of all folders in the folder_id given
-        root_folders = self._make_request(f"mimeType = 'application/vnd.google-apps.folder' and '{folder_id}' in parents and trashed = false")
-        root_files = self._make_request(f"mimeType != 'application/vnd.google-apps.folder' and '{folder_id}' in parents and trashed = false")
+        root_folders = self._make_request(f"mimeType = 'application/vnd.google-apps.folder' and '{folder_id}' in parents")
+        root_files = self._make_request(f"mimeType != 'application/vnd.google-apps.folder' and '{folder_id}' in parents")
         for folder in root_folders:
             folder_name = self._sanitize_filename(folder['name'])
             folder_id = folder['id']
