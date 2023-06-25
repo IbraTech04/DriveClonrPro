@@ -80,7 +80,8 @@ class DriveDownloadr(tk.Frame):
     
     def start_download(self) -> int:
         """
-        Method which traverses the users Google Drive and returns the total number of files to be cloned
+        Method which traverses the users Google Drive and recursively calls the _download method
+        Preconditions: self.service is not None and is a valid Google Drive API service
         """
         download_list = []
         if self.config['my_drive']:
@@ -88,7 +89,14 @@ class DriveDownloadr(tk.Frame):
         if self.config['shared']:
             download_list.append("sharedWithMe")
         
-        for query in download_list:        
+        len_dict = {1: "one of one", 2: "one of two"}
+        name_dict = {"'root' in parents": "Your Files", "sharedWithMe": "Shared Files"}
+        self.stage['text'] = f"Stage {len_dict[len(download_list)]}: Downloading {name_dict[download_list[0]]}"
+        
+        for i in range(len(download_list)):
+            query = download_list[i]        
+            self.stage['text'] = f"Stage {len_dict[len(download_list)]}: Downloading {name_dict[download_list[i]]}"
+            self.stage.update()
             # Get a list of all the root folders
             root_folders = self._make_request(f"mimeType = 'application/vnd.google-apps.folder' and {query} and trashed = false")
             root_files = self._make_request(f"mimeType != 'application/vnd.google-apps.folder' and {query} and trashed = false")
@@ -99,7 +107,7 @@ class DriveDownloadr(tk.Frame):
                 if not os.path.exists(f"{self.config['destination']}/{folder_name}"):
                     os.mkdir(f"{self.config['destination']}/{folder_name}")
                 folder_id = folder['id']
-                self._download(folder_id, f"{self.config['destination']}/{folder['name']}")
+                self._download(folder_id, f"{self.config['destination']}/{folder_name}")
             for file in root_files:
                 file_name = self._sanitize_filename(file['name'])
                 self.current_file['text'] = f"Current File: {file['name']}"
@@ -122,6 +130,7 @@ class DriveDownloadr(tk.Frame):
         """
         Helper method for start_download which downloads all the files in a given folder
         """
+    
         # Get a list of all folders in the folder_id given
         root_folders = self._make_request(f"mimeType = 'application/vnd.google-apps.folder' and '{folder_id}' in parents and trashed = false")
         root_files = self._make_request(f"mimeType != 'application/vnd.google-apps.folder' and '{folder_id}' in parents and trashed = false")
@@ -132,7 +141,7 @@ class DriveDownloadr(tk.Frame):
             self.current_file.update()
             if not os.path.exists(f"{current_dir}/{folder_name}"):
                 os.mkdir(f"{current_dir}/{folder_name}")
-            self._download(folder_id, f"{current_dir}/{folder['name']}")
+            self._download(folder_id, f"{current_dir}/{folder_name}")
         for file in root_files:
             file_name = self._sanitize_filename(file['name'])
             self.current_file['text'] = f"Current File: {file['name']}"
@@ -187,7 +196,7 @@ class DriveDownloadr(tk.Frame):
         if sanitized_filename.lower() in reserved_names:
             sanitized_filename += '_'
 
-        return sanitized_filename
+        return sanitized_filename.strip()
 
     def _download_as_pdf(self, file_ID):
         """

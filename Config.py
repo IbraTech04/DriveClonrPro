@@ -120,7 +120,7 @@ class ConfigWindow(tk.Frame):
             try:
                 key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\FileSystem", 0, winreg.KEY_READ)
                 value, _ = winreg.QueryValueEx(key, "LongPathsEnabled")
-                if value == 1:
+                if value != 1:
                     # Make a warning saying "we need to change this"
                     tk.messagebox.showwarning("Warning", "Clonr needs to change a registry setting to work properly. (LongPathsEnabled) This requires UAC elevation. Please click OK to continue.")
                     # Run the file called disable-file-limit.reg

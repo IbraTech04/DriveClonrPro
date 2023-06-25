@@ -37,10 +37,14 @@ Coming Soon: A proper TreeView widget that allows the user to select which folde
 ## Features:
 
 1. Auto LongFilePaths enabler on Windows
-    To avoid complex file-name size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit.
+    To avoid complex file-path size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit.
 
 2. Unmatched Google Workspace Support
     New with DriveClonrPro is the ability to specify what each type of Google Workspace document is converted to. For example, you can choose to convert all Google Docs to Microsoft Word documents and all Google Sheets to PDF documents. Unlike the legacy DriveClonr, you're no longer stuck with either-or. 
+
+3. Direct-Download. 
+    Unlike manually selecting files from Google Drive, DriveClonrPro directly downloads the files from Google Drive without the need for a compression intermediary. This means that you don't have to worry about Google Drive's download limits - And also get instant access to your files :P
+
 ## Planned Features:
 
 1. Multithreading
