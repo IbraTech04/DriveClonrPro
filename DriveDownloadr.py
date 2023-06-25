@@ -40,11 +40,20 @@ class DriveDownloadr(tk.Frame):
             "application/vnd.google-apps.jam": self._download_as_pdf
             }
         
+        self.extensions = {
+            "application/vnd.google-apps.document": ".docx",
+            "application/vnd.google-apps.spreadsheet": ".xlsx",
+            "application/vnd.google-apps.presentation": ".pptx",
+            "application/vnd.google-apps.drawing": ".png",
+            "application/vnd.google-apps.jam": ".pdf"
+        }
+        
         # Now, iterate through the config dict and update the downloaders dict accordingly
         for setting in self.config['mime_types']:
             # If any one of them is PDF, update the downloaders dict accordingly
             if self.config['mime_types'][setting] == "PDF":
                 self.downloaders[setting] = self._download_as_pdf
+                self.extensions[setting] = ".pdf"
 
         # Header Text:
         self.header_text = ttk.Label(self, text="Cloning your Google Drive", font=("Helvetica", 16, "bold"))
@@ -112,10 +121,11 @@ class DriveDownloadr(tk.Frame):
                 file_name = self._sanitize_filename(file['name'])
                 self.current_file['text'] = f"Current File: {file['name']}"
                 self.current_file.update()
-                if not os.path.exists(f"{self.config['destination']}/{file_name}"):
+                extension = self.extensions.get(file['mimeType'], "")
+                if not os.path.exists(f"{self.config['destination']}/{file_name}{extension}"):
                     downloader = self.downloaders.get(file['mimeType'], self._download_normal)
-                    fileio, extension = downloader(file['id'])
-                    with open(f"{self.config['destination']}/{file_name}.{extension}", 'wb') as f:
+                    fileio = downloader(file['id'])
+                    with open(f"{self.config['destination']}/{file_name}{extension}", 'wb') as f:
                         f.write(fileio.getvalue())
                         f.close()
         # If we're here, cloning is complete. Show the new screen
@@ -146,10 +156,11 @@ class DriveDownloadr(tk.Frame):
             file_name = self._sanitize_filename(file['name'])
             self.current_file['text'] = f"Current File: {file['name']}"
             self.current_file.update()
-            if not os.path.exists(f"{current_dir}/{file_name}"):
+            extension = self.extensions.get(file['mimeType'], '')
+            if not os.path.exists(f"{current_dir}/{file_name}{extension}"):
                 downloader = self.downloaders.get(file['mimeType'], self._download_normal)
-                fileio, extension = downloader(file['id'])
-                with open(f"{current_dir}/{file_name}.{extension}", 'wb') as f:
+                fileio = downloader(file['id'])
+                with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
                     f.write(fileio.getvalue())
                     f.close()
 
@@ -208,7 +219,7 @@ class DriveDownloadr(tk.Frame):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-        return fh, 'pdf'
+        return fh
 
     def _download_as_docx(self, file_ID):
         """
@@ -220,7 +231,7 @@ class DriveDownloadr(tk.Frame):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-        return fh, 'docx'
+        return fh
 
     def _download_as_xlsx(self, file_ID):
         """
@@ -232,7 +243,7 @@ class DriveDownloadr(tk.Frame):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-        return fh, 'xlsx'
+        return fh
 
     def _download_as_pptx(self, file_ID):
         """
@@ -244,7 +255,7 @@ class DriveDownloadr(tk.Frame):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-        return fh, 'pptx'
+        return fh
 
     def _download_as_png(self, file_ID):
         """
@@ -256,7 +267,7 @@ class DriveDownloadr(tk.Frame):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-        return fh, 'png'
+        return fh
 
     def _download_normal(self, file_ID):
         """
@@ -268,7 +279,7 @@ class DriveDownloadr(tk.Frame):
         done = False
         while done is False:
             status, done = downloader.next_chunk()
-        return fh, ""
+        return fh
 
 if __name__ == "__main__":
     # If this file is run directly, run in debug mode
