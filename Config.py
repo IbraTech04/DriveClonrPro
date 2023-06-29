@@ -11,11 +11,12 @@ class ConfigWindow(tk.Frame):
     """
     Configuration information for the Clone of the drive
     """
-    def __init__(self, parent: tk.Tk, service):
+    def __init__(self, parent: tk.Tk, service, creds):
         super().__init__(parent)
         self.parent = parent
         self.service = service
-
+        self.creds = creds
+        
         # HEADER AND SUBHEADING        
         self.header = ttk.Label(self.parent, text="Configure your Clonr", font=("Helvetica", 16, "bold"))
         self.header.pack(pady=10)
@@ -145,7 +146,7 @@ class ConfigWindow(tk.Frame):
         
         super().pack_forget()
         super().destroy()
-        ReadyToStart(self.parent, self.service, config).pack()
+        ReadyToStart(self.parent, self.service, self.creds, config).pack()
 
 
 if __name__ == "__main__":

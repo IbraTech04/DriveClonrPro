@@ -3,11 +3,12 @@ import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 from DriveDownloadr import DriveDownloadr
 class ReadyToStart(tk.Frame):
-    def __init__(self, parent: tk.Tk, service, config: dict):
+    def __init__(self, parent: tk.Tk, service, creds, config: dict):
         super().__init__(parent)
         self.parent = parent
         self.service = service
         self.config = config
+        self.creds = creds
         # LOGO IMAGE
         self.logo_image = Image.open("DriveClonr Logo.png")
         self.logo_image = self.logo_image.resize((200, 200)) 
@@ -25,4 +26,4 @@ class ReadyToStart(tk.Frame):
     
     def start_cloning(self):
         super().destroy()
-        DriveDownloadr(self.parent, self.service, self.config).pack()        
+        DriveDownloadr(self.parent, self.service, self.creds, self.config).pack()        

@@ -43,4 +43,4 @@ class AccountSelector(ttk.Frame):
         # Bring the root window back to the front
         self.parent.attributes('-topmost', 1)
         self.parent.attributes('-topmost', 0)
-        ConfigWindow(self.parent, self.service).pack()
+        ConfigWindow(self.parent, self.service, creds).pack()

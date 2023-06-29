@@ -1,3 +1,4 @@
+import json
 import os
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -8,18 +9,18 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from threading import Thread
 import re
+import requests
 
 class DriveDownloadr(tk.Frame):
     """
     Class which contains all the methods related to actually cloning the user's drive
     """
     
-    def __init__(self, parent: tk.Tk, service: build, config: dict):
+    def __init__(self, parent: tk.Tk, service: build, creds, config: dict):
         super().__init__(parent)
         self.service = service
         self.config = config
-        self.completed_files = 0
-        self.total_files = 0
+        self.creds = creds
 
         # We need to make a dict that maps each filetype to its representive method in this class
         
@@ -49,12 +50,22 @@ class DriveDownloadr(tk.Frame):
             "application/vnd.google-apps.jam": ".pdf"
         }
         
+        self.mime_type_mapping = {
+            "application/vnd.google-apps.document": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "application/vnd.google-apps.spreadsheet": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.google-apps.presentation": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "application/vnd.google-apps.drawing": "image/png",
+            "application/vnd.google-apps.jam": "application/pdf"
+        }
+        
+        
         # Now, iterate through the config dict and update the downloaders dict accordingly
         for setting in self.config['mime_types']:
             # If any one of them is PDF, update the downloaders dict accordingly
             if self.config['mime_types'][setting] == "PDF":
                 self.downloaders[setting] = self._download_as_pdf
                 self.extensions[setting] = ".pdf"
+                self.mime_type_mapping[setting] = "application/pdf"
 
         # Header Text:
         self.header_text = ttk.Label(self, text="Cloning your Google Drive", font=("Helvetica", 16, "bold"))
@@ -97,20 +108,11 @@ class DriveDownloadr(tk.Frame):
         if self.config['my_drive']:
             download_list.append("'root' in parents and trashed = false")
             # To get the total files for "my drive" we can make a search query with not 'me' in owners
-            self.total_files += len(self._make_request("trashed = false and 'me' in owners"))
         if self.config['shared']:
             download_list.append("sharedWithMe and trashed = false")
-            self.total_files += len(self._make_request("not 'me' in owners and trashed = false"))
         if self.config['trashed']:
             download_list.append("trashed = true")
-            self.total_files += len(self._make_request("trashed = true"))
-            
-        # Now we can use the preexisting pb as a total progress pb, and create another one underneath to denote the current file progress
-        self.pb['value'] = 0
-        self.pb['maximum'] = 100
-        self.pb.update()
-        # We also need to remember to set its mode to determinate
-        self.pb['mode'] = 'determinate'
+
         name_dict = {"'root' in parents and trashed = false": "Your Files", "sharedWithMe and trashed = false": "Shared Files", "trashed = true": "Trashed Files"}
         
         for i in range(len(download_list)):
@@ -135,18 +137,21 @@ class DriveDownloadr(tk.Frame):
                 folder_id = folder['id']
                 self._download(folder_id, f"{current_dir}/{folder_name}")
             for file in root_files:
-                self.completed_files += 1
-                self.pb['value'] = ((self.completed_files/self.total_files))
                 file_name = self._sanitize_filename(file['name'])
                 self.current_file['text'] = f"Current File: {file['name']}"
                 self.current_file.update()
                 extension = self.extensions.get(file['mimeType'], "")
                 if not os.path.exists(f"{current_dir}/{file_name}{extension}"):
                     downloader = self.downloaders.get(file['mimeType'], self._download_normal)
-                    fileio = downloader(file['id'])
-                    with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
-                        f.write(fileio.getvalue())
-                        f.close()
+                    try:
+                        fileio = downloader(file['id'])
+                        with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
+                            f.write(fileio.getvalue())
+                            f.close()
+                    except HttpError:
+                        print("File too large to download normally. Downloading using export links")
+                        self._download_using_export_links(file, current_dir, file_name, extension)
+
         # If we're here, cloning is complete. Show the new screen
         self.pb.stop()
         self.pb.destroy()
@@ -173,16 +178,43 @@ class DriveDownloadr(tk.Frame):
             self._download(folder_id, f"{current_dir}/{folder_name}")
         for file in root_files:
             file_name = self._sanitize_filename(file['name'])
-            self.completed_files += 1
-            self.pb['value'] = ((self.completed_files/self.total_files))
-            self.current_file.update()
+            self.current_file['text'] = f"Current File: {file['name']}"
+            self.current_file.update()            
             extension = self.extensions.get(file['mimeType'], '')
             if not os.path.exists(f"{current_dir}/{file_name}{extension}"):
                 downloader = self.downloaders.get(file['mimeType'], self._download_normal)
-                fileio = downloader(file['id'])
-                with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
-                    f.write(fileio.getvalue())
-                    f.close()
+                try:
+                    fileio = downloader(file['id'])
+                    with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
+                        f.write(fileio.getvalue())
+                        f.close()
+                except HttpError:
+                    print("File too large to download normally. Downloading using export links")
+                    self._download_using_export_links(file, current_dir, file_name, extension)
+
+    def _download_using_export_links(self, file, current_dir: str, file_name: str, extension: str) -> None:
+        """
+        Method used to work around the Google Drive API export size limitation
+        """
+
+        id = self.service.permissions().create(fileId=file['id'], body={"role": "reader", "type": "anyone", "allowFileDiscovery": False}).execute()                 
+        links = file['exportLinks']
+        link = links[self.mime_type_mapping[file['mimeType']]]
+
+        # Now simply making a request to the link is insufficient because we need to add the authorization header
+        token_info = self.creds.to_json()
+        token_info = json.loads(token_info)
+        
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",                        
+        }                                   
+        # Now we have a direct link to the file. We can download it using requests
+        r = requests.get(link, headers=headers)
+        with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
+            f.write(r.content)
+            f.close()
+        # Now we need to revert the permissions back to what they were before   
+        self.service.permissions().delete(fileId=file['id'], permissionId=id['id']).execute()
 
     def _make_request(self, request: str) -> list:
         """
@@ -190,7 +222,7 @@ class DriveDownloadr(tk.Frame):
         """
         # We're going to add a list of extras to the query to simplify the code
         # We're going to remove forms, sites, colab, and shortcuts
-        response = self.service.files().list(fields="nextPageToken, files(id, name, mimeType)", q=f"{request} and mimeType != 'application/vnd.google-apps.form' and mimeType != 'application/vnd.google-apps.site' and mimeType != 'application/vnd.google-apps.shortcut' and mimeType != 'application/vnd.google-apps.map' and mimeType != 'application/vnd.google-apps.script' and mimeType != 'application/vnd.google-apps.drive-sdk'").execute()
+        response = self.service.files().list(fields="nextPageToken, files(id, name, mimeType, exportLinks)", q=f"{request} and mimeType != 'application/vnd.google-apps.form' and mimeType != 'application/vnd.google-apps.site' and mimeType != 'application/vnd.google-apps.shortcut' and mimeType != 'application/vnd.google-apps.map' and mimeType != 'application/vnd.google-apps.script' and mimeType != 'application/vnd.google-apps.drive-sdk'").execute()
         folders = response.get('files', [])
         nextPageToken = response.get('nextPageToken')
         while nextPageToken:

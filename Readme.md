@@ -48,10 +48,10 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 ## Features:
 
 1. Auto LongFilePaths enabler on Windows
-    To avoid complex file-path size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit (Unix go brrr). 
+    To avoid complex recursive file-path size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit (Unix go brrr). 
 
 2. Unmatched Google Workspace Support
-    New with DriveClonrPro is the ability to specify what each type of Google Workspace document is converted to. For example, you can choose to convert all Google Docs to Microsoft Word documents and all Google Sheets to PDF documents. Unlike the legacy DriveClonr, you're no longer stuck with either-or. 
+    - New with DriveClonrPro is the ability to specify what each type of Google Workspace document is converted to. For example, you can choose to convert all Google Docs to Microsoft Word documents and all Google Sheets to PDF documents. Unlike the legacy DriveClonr, you're no longer stuck with either-or. 
 
 3. Direct-Download. 
     Unlike manually selecting files from Google Drive, DriveClonrPro directly downloads the files from Google Drive without the need for a compression intermediary (like .zip). This means that you don't have to worry about Google Drive's download limits - And also get instant access to your files :P
@@ -59,6 +59,8 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 4. Cross-platform
     A feature completely in the control of Tkinter and Python, I'm taking credit for it regardless :P. DriveClonrPro is cross-platform, meaning it works on Windows, macOS, and Linux. Granted, I've only tested it on Windows, but by PSMI (Pure Software MagIc™) it should work on macOS and Linux as well.
 
+5. Complete filesize support
+    Unlike its predecessor, DriveClonrPro supports cloning files of any size - Specifically exported Google Workspace documents. Whereas DriveClonr would have failed at cloning the file, DriveClonrPro is able to use export links to bypass the export limit and clone the file.
 ## Planned Features:
 
 1. Multithreading
@@ -87,3 +89,6 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 
 9. Shared Drives Cloning
     As of right now, DriveClonrPro only supports cloning files from your personal Google Drive. At some point, I'd like to add support for Shared Drives as well - To fully honor the name "Clonr"
+
+10. Language Support
+    At some point I'd like to add support for languages other than English - Mostly as a challenge to myself but also to make DriveClonr more accessible to non-English speakers.
