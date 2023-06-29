@@ -18,7 +18,8 @@ class DriveDownloadr(tk.Frame):
         super().__init__(parent)
         self.service = service
         self.config = config
-
+        self.completed_files = 0
+        self.total_files = 0
 
         # We need to make a dict that maps each filetype to its representive method in this class
         
@@ -95,11 +96,21 @@ class DriveDownloadr(tk.Frame):
         download_list = []
         if self.config['my_drive']:
             download_list.append("'root' in parents and trashed = false")
+            # To get the total files for "my drive" we can make a search query with not 'me' in owners
+            self.total_files += len(self._make_request("trashed = false and 'me' in owners"))
         if self.config['shared']:
             download_list.append("sharedWithMe and trashed = false")
+            self.total_files += len(self._make_request("not 'me' in owners and trashed = false"))
         if self.config['trashed']:
             download_list.append("trashed = true")
-        
+            self.total_files += len(self._make_request("trashed = true"))
+            
+        # Now we can use the preexisting pb as a total progress pb, and create another one underneath to denote the current file progress
+        self.pb['value'] = 0
+        self.pb['maximum'] = 100
+        self.pb.update()
+        # We also need to remember to set its mode to determinate
+        self.pb['mode'] = 'determinate'
         name_dict = {"'root' in parents and trashed = false": "Your Files", "sharedWithMe and trashed = false": "Shared Files", "trashed = true": "Trashed Files"}
         
         for i in range(len(download_list)):
@@ -124,6 +135,8 @@ class DriveDownloadr(tk.Frame):
                 folder_id = folder['id']
                 self._download(folder_id, f"{current_dir}/{folder_name}")
             for file in root_files:
+                self.completed_files += 1
+                self.pb['value'] = ((self.completed_files/self.total_files))
                 file_name = self._sanitize_filename(file['name'])
                 self.current_file['text'] = f"Current File: {file['name']}"
                 self.current_file.update()
@@ -160,7 +173,8 @@ class DriveDownloadr(tk.Frame):
             self._download(folder_id, f"{current_dir}/{folder_name}")
         for file in root_files:
             file_name = self._sanitize_filename(file['name'])
-            self.current_file['text'] = f"Current File: {file['name']}"
+            self.completed_files += 1
+            self.pb['value'] = ((self.completed_files/self.total_files))
             self.current_file.update()
             extension = self.extensions.get(file['mimeType'], '')
             if not os.path.exists(f"{current_dir}/{file_name}{extension}"):

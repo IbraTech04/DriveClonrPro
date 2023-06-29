@@ -43,6 +43,7 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 1. DriveClonrPro does not check for ample space before cloning. This is something I aim to rectify in the future.
 2. Any exception within the Google Drive API (or anywhere else, for that matter) will cause DriveClonrPro to crash. This is something I aim to rectify in the future.
 3. Tkinter seems to not like the cloning screen; The layout of the objects moves around a lot when the length of the file name changes. This is something I aim to rectify in the future.
+4. The UI doesn't scale properly; it becomes blurry when scaled up. This is probably an issue with Tkinter that I don't think I can fix easily
 
 ## Features:
 
@@ -83,3 +84,6 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 
 8. Dealing with files too large to be exported with the API
     Some files don't like to be exported with the Google Drive API. I'm not sure why Google doesn't allow this, but it's something I'd like to remedy in the future to maintain the 1:1 clone. 
+
+9. Shared Drives Cloning
+    As of right now, DriveClonrPro only supports cloning files from your personal Google Drive. At some point, I'd like to add support for Shared Drives as well - To fully honor the name "Clonr"

@@ -40,4 +40,7 @@ class AccountSelector(ttk.Frame):
         DISCOVERY_SERVICE_URL = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
         self.service = build('drive', 'v3', credentials=creds, discoveryServiceUrl=DISCOVERY_SERVICE_URL)
         self.destroy()
+        # Bring the root window back to the front
+        self.parent.attributes('-topmost', 1)
+        self.parent.attributes('-topmost', 0)
         ConfigWindow(self.parent, self.service).pack()

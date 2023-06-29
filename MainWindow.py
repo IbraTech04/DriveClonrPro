@@ -41,7 +41,7 @@ class MainWindow():
         # WELCOME TEXT
         self.welcome_text = ttk.Label(self.current_frame, text="Welcome To DriveClonr", font=("Helvetica", 16, "bold"))
         self.welcome_text.pack(pady=5)
-        self.tagline = ttk.Label(self.current_frame, text="The industry standard for Google Drive cloning", font=("Helvetica", 12, "italic"), wraplength=300, justify="center")
+        self.tagline = ttk.Label(self.current_frame, text="The BEST way to clone your Google Drive!", font=("Helvetica", 12, "italic"), wraplength=300, justify="center")
         self.tagline.pack(pady=5)
         
         # START BUTTON
