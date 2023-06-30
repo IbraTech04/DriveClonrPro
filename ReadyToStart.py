@@ -1,11 +1,12 @@
 import tkinter as tk
 import tkinter.ttk as ttk
+from typing import TextIO
 from PIL import Image, ImageTk
 from DriveDownloadr import DriveDownloadr
 
 
 class ReadyToStart(tk.Frame):
-    def __init__(self, parent: tk.Tk, service, log_file, config: dict):
+    def __init__(self, parent: tk.Tk, service, log_file: TextIO, config: dict):
         super().__init__(parent)
         self.parent = parent
         self.service = service
@@ -27,6 +28,9 @@ class ReadyToStart(tk.Frame):
         self.pack()
     
     def start_cloning(self):
+        """
+        Method which starts the cloning process by destroying the current frame and creating a new DriveDownloadr object
+        """
         super().destroy()
         print("Starting Cloning Process", file=self.log_file)
         DriveDownloadr(self.parent, self.service, self.log_file, self.config).pack()        

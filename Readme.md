@@ -40,10 +40,8 @@ Simply put, I treat the Google Drive file structure like a massive tree and recu
 I'm not sure why I chose postorder traversal, but it works so I'm not complaining :shrug:. In hindsight I should've used level-order traversal, but if it works, it works.
 
 ## Known Issues
-1. DriveClonrPro does not check for ample space before cloning. This is something I aim to rectify in the future.
-2. Any exception within the Google Drive API (or anywhere else, for that matter) will cause DriveClonrPro to crash. This is something I aim to rectify in the future.
-3. Tkinter seems to not like the cloning screen; The layout of the objects moves around a lot when the length of the file name changes. This is something I aim to rectify in the future.
-4. The UI doesn't scale properly; it becomes blurry when scaled up. This is probably an issue with Tkinter that I don't think I can fix easily
+1. Tkinter seems to not like the cloning screen; The layout of the objects moves around a lot when the length of the file name changes. This is something I aim to rectify in the future.
+2. The UI doesn't scale properly; it becomes blurry when scaled up. This is probably an issue with Tkinter that I don't think I can fix easily
 
 ## Features:
 

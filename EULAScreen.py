@@ -1,10 +1,11 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter.scrolledtext import ScrolledText
+from typing import TextIO
 from AccountSelectorScreen import AccountSelector
 
 class EULAView(tk.Frame):
-    def __init__(self, parent: tk.Tk, log_file) -> None:
+    def __init__(self, parent: tk.Tk, log_file: TextIO) -> None:
         super().__init__(parent)
         self.parent = parent
         self.log_file = log_file
@@ -45,6 +46,9 @@ class EULAView(tk.Frame):
         self.pack()
     
     def destroy(self):
+        """
+        Method which destroys the EULA window and brings up the account selector
+        """
         print("User accepted EULA", file=self.log_file)
         super().destroy()
         AccountSelector(self.parent, self.log_file).pack()

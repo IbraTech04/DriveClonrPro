@@ -2,7 +2,8 @@ import shutil
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
-import os 
+import os
+from typing import TextIO 
 from ReadyToStart import ReadyToStart
 import winreg
 import psutil
@@ -14,7 +15,7 @@ class ConfigWindow(tk.Frame):
     """
     Configuration information for the Clone of the drive
     """
-    def __init__(self, parent: tk.Tk, service, log_file):
+    def __init__(self, parent: tk.Tk, service, log_file: TextIO):
         super().__init__(parent)
         self.parent = parent
         self.service = service
@@ -102,11 +103,18 @@ class ConfigWindow(tk.Frame):
         self.save_button.pack(pady=20)
 
     def browse_destination(self):
+        """
+        Opens a file dialog to select the destination directory
+        """
         destination_path = filedialog.askdirectory()
         self.destination_entry.delete(0, tk.END)
         self.destination_entry.insert(tk.END, destination_path)
 
     def save_configuration(self):
+        """
+        Saves the configuration to a dictionary and passes it to the CloneWindow
+        Kills the ConfigWindow
+        """
         # Step One: Make sure the user has entered a valid destination  
         destination = self.destination_entry.get()
         if not destination or not os.path.isdir(destination):

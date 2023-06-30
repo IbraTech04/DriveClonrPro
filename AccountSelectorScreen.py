@@ -2,8 +2,9 @@ from __future__ import print_function
 
 import tkinter as tk
 import tkinter.ttk as ttk
+from typing import TextIO
 from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
+from googleapiclient.discovery import build, Resource
 from PIL import Image, ImageTk
 from Config import ConfigWindow
 
@@ -11,7 +12,10 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 
 
 class AccountSelector(ttk.Frame):
-    def __init__(self, parent: tk.Tk, log_file):
+    log_file: TextIO
+    parent: tk.Tk
+    service: Resource
+    def __init__(self, parent: tk.Tk, log_file: TextIO):
         super().__init__(parent)
         self.parent = parent
         self.log_file = log_file
@@ -32,6 +36,9 @@ class AccountSelector(ttk.Frame):
         self.sign_in_button.pack(pady=5)
 
     def sign_in(self):
+        """
+        Method which triggers the OAuth flow for the user to sign in
+        """
         print("Signing in...", file=self.log_file)
         flow = InstalledAppFlow.from_client_secrets_file(
                 'creds.json', SCOPES)

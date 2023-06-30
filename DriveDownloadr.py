@@ -1,6 +1,7 @@
 import json
 import os
-from googleapiclient.discovery import build
+from typing import TextIO
+from googleapiclient.discovery import build, Resource
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 import io
@@ -17,9 +18,21 @@ MIMETYPE_EXTENSIONS = {"application/vnd.openxmlformats-officedocument.wordproces
 class DriveDownloadr(tk.Frame):
     """
     Class which contains all the methods related to actually cloning the user's drive
+    
+    === Public Attributes ===
+    service: The Google Drive API service object
+    config: The config dict
+    log_file: The log file
+    failed_files: A list of files that failed to download
+    mime_type_mapping: A dict that maps each MimeType to the corresponding export MimeType
+    extensions: A dict that maps each MimeType to the corresponding file extension
+    === Representation Invariants ===
+    service is a valid Google Drive API service object with the correct scopes
+    config is a valid config dict that contains all the required keys
+    mime_type_mapping[x] = the valid extension pair for extension[x]
     """
     
-    def __init__(self, parent: tk.Tk, service: build, log_file, config: dict):
+    def __init__(self, parent: tk.Tk, service: Resource, log_file: TextIO, config: dict) -> None:
         super().__init__(parent)
         self.service = service
         self.config = config
@@ -29,18 +42,17 @@ class DriveDownloadr(tk.Frame):
         
         # We need to make a dict that maps each MimeType to the corresponding export MimeType
         # Example: {"application/vnd.google-apps.document": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
-        
         self.mime_type_mapping = {
             config_setting: self.config['mime_types'][config_setting]
             for config_setting in self.config['mime_types']
         }
-            
+        # We also need to do the same thing for extensions
         self.extensions = {
             mime_type: MIMETYPE_EXTENSIONS[self.mime_type_mapping[mime_type]]
             for mime_type in self.mime_type_mapping
         }
         
-        # Add jamboard to both as PDF
+        # Add jamboard to both as PDF - Since it's not directly changable in the Config screen
         self.mime_type_mapping['application/vnd.google-apps.jam'] = 'application/pdf'
         self.extensions['application/vnd.google-apps.jam'] = '.pdf'
 
@@ -51,13 +63,13 @@ class DriveDownloadr(tk.Frame):
         self.stage = ttk.Label(self, text=f"Stage one of {num_stages}: Downloading {current_stage}", font=("Helvetica", 12, "normal"), justify="center")
         self.header_text.grid(row=0, column=0, columnspan=2, pady=5)
         self.stage.grid(row=1, column=0, columnspan=2, pady=5, sticky="nswe")
-
+        # Logo Image
         self.logo_image = Image.open("DriveClonr Logo.png")
         self.logo_image = self.logo_image.resize((200, 200))
         self.logo_photo = ImageTk.PhotoImage(self.logo_image)
         self.logo_label = ttk.Label(self, image=self.logo_photo, justify="center")
         self.logo_label.grid(row=2, column=0, columnspan=2, rowspan=2, padx=10, sticky="nswe")
-
+        # Progress Bar
         self.pb = ttk.Progressbar(
             self,
             orient='horizontal',
@@ -66,7 +78,7 @@ class DriveDownloadr(tk.Frame):
         )
         self.pb.start(10)
         self.pb.grid(row=5, column=0, rowspan=2, pady=10, padx=10)
-
+        # Placeholder text
         self.current_file = ttk.Label(self, text="Current File: None", font=("Helvetica", 12, "normal"), justify="center")
         self.current_file.grid(row=8, column=0, columnspan=7, pady=5, padx=10, sticky="nswe")
 
@@ -76,7 +88,7 @@ class DriveDownloadr(tk.Frame):
         self.analyze_thread = Thread(target=self.start_download).start()
         
     
-    def start_download(self) -> int:
+    def start_download(self) -> None:
         """
         Method which traverses the users Google Drive and recursively calls the _download method
         Preconditions: self.service is not None and is a valid Google Drive API service
@@ -92,6 +104,9 @@ class DriveDownloadr(tk.Frame):
             download_list.append("trashed = true")
 
         name_dict = {"'root' in parents and trashed = false": "Your Files", "sharedWithMe and trashed = false": "Shared Files", "trashed = true": "Trashed Files"}
+        
+        # AT some point I aim to refactor the donwloading code since right now there's a lot of duplicate code
+        # But as per usual; i'm too lazy :P
         
         for i in range(len(download_list)):
             query = download_list[i]        
@@ -141,7 +156,7 @@ class DriveDownloadr(tk.Frame):
                             self.failed_files.append((file['name'], file['id'], e.reason))
 
         # If we're here, cloning is complete. Show the new screen
-        with open("failed_files.txt", 'w') as f:
+        with open(f"{self.config['destination']}/failedfiles.txt", 'w') as f:
             for file in self.failed_files:
                 f.write(f"{file[0]} ({file[1]}): {file[2]}\n")
             f.close()
@@ -152,12 +167,12 @@ class DriveDownloadr(tk.Frame):
         self.header_text['text'] = "Cloning Complete!"  
         # Set self.stage to apply word wrap
         self.stage['wraplength'] = 500
-        self.stage['text'] = "Your Google Drive has been cloned to your computer. You can view failed files in failed_files.txt, found in the same directory as your cloned files."
+        self.stage['text'] = "Your Google Drive has been cloned to your computer. You can view failed files in failedfiles.txt, found in the same directory as your cloned files."
         self.directory_button = tk.Label(self, text="Open Cloned Directory", fg="blue", cursor="hand2")
         self.directory_button.bind("<Button-1>", lambda e: self._open_directory())
         self.directory_button.grid(row=3, column=15, pady=10)
         
-    def _download(self, folder_id: str, current_dir: str) -> int:
+    def _download(self, folder_id: str, current_dir: str) -> None:
         """
         Helper method for start_download which downloads all the files in a given folder
         """
@@ -198,15 +213,17 @@ class DriveDownloadr(tk.Frame):
                         print(f"{time.strftime('%H:%M:%S')} Unknown error occured downloading file {file['name']}: {e}", file=self.log_file)
                         self.failed_files.append((file['name'], file['id']))
 
-    def _open_directory(self):
+    def _open_directory(self) -> None:
         """
         Opens the cloned directory in the file explorer
+        Precondition: The cloned directory exists
         """
         os.startfile(self.config['destination'])
 
     def _download_using_export_links(self, file, current_dir: str, file_name: str, extension: str) -> None:
         """
         Method used to work around the Google Drive API export size limitation
+        Precondition: The file is too large to be exported, and the file is a Google Workspace Document
         """
         print(f"{time.strftime('%H:%M:%S')} Starting download of {file['name']} using export links", file=self.log_file)
         print(f"{time.strftime('%H:%M:%S')} Creating temporary permission for file {file['name']}", file=self.log_file)
@@ -230,9 +247,10 @@ class DriveDownloadr(tk.Frame):
         print(f"{time.strftime('%H:%M:%S')} Removing temporary permission for file {file['name']}", file=self.log_file)
         self.service.permissions().delete(fileId=file['id'], permissionId=id['id']).execute()
 
-    def _make_request(self, request: str) -> list:
+    def _make_request(self, request: str) -> list[dict]:
         """
         Method to simplify making requests to the Google Drive API
+        Preconditions: request is a valid query string
         """
         # We're going to add a list of extras to the query to simplify the code
         # We're going to remove forms, sites, colab, and shortcuts
@@ -245,7 +263,10 @@ class DriveDownloadr(tk.Frame):
             nextPageToken = response.get('nextPageToken')
         return folders
 
-    def _sanitize_filename(self, filename):
+    def _sanitize_filename(self, filename: str) -> str:
+        """
+        Method used to remove invalid characters from a filename
+        """
         # Define the pattern to match characters not allowed in a filename
         invalid_chars_pattern = r'[<>:"/\\|?*\x00-\x1F\x7F]+'
         # Define the pattern to match emojis
@@ -275,9 +296,15 @@ class DriveDownloadr(tk.Frame):
 
         return sanitized_filename.strip()
     
-    def _download_file(self, file_ID, mime_type = None):
+    def _download_file(self, file_ID, mime_type = None) -> io.BytesIO:
         """
         Method to download a file with the specified MIME type
+        Precondition:
+        if mime_type is None:
+            file_ID is a valid file ID, and is not a Google Workspace Document
+        if mime_type is not None:
+            file_ID is a valid file ID, and is a Google Workspace Document
+            mime_type is a valid MIME type, and is a valid export option for the file
         """
         if mime_type is None:
             request = self.service.files().get_media(fileId=file_ID)
