@@ -6,7 +6,17 @@ By installing, copying, or otherwise using the Software, you agree to be bound b
 
 1. Grant of License. DriveClonr grants you a non-exclusive, non-transferable, revocable, and limited license to use the Software on a single computer or device for your personal or internal business purposes, subject to the terms and conditions of this EULA.
 
-2. Restrictions. You may not: (a) copy, modify, adapt, translate, reverse engineer, decompile, disassemble, or create derivative works based on the Software; (b) rent, lease, lend, sell, sublicense, distribute, or otherwise transfer the Software or any rights therein to any third party; (c) remove any proprietary notices or labels on the Software; (d) use the Software for any illegal, immoral, or unauthorized purpose; or (e) violate any applicable laws or regulations in connection with your use of the Software.
+2. Restrictions. "You are granted the following permissions regarding the Software, provided that such use complies with the terms and conditions of the MIT Open Source License:
+
+(a) You are free to copy, modify, adapt, translate, reverse engineer, decompile, disassemble, or create derivative works based on the Software.
+
+(b) You may rent, lease, lend, sell, sublicense, distribute, or otherwise transfer the Software or any rights therein to any third party, in accordance with the MIT Open Source License.
+
+(c) You may remove any proprietary notices or labels on the Software, provided that the attribution requirements of the MIT Open Source License are satisfied.
+
+(d) You may use the Software for any lawful purpose, authorized by the MIT Open Source License.
+
+(e) You shall comply with all applicable laws and regulations in connection with your use of the Software."
 
 3. Ownership. The Software is licensed, not sold, to you. DriveClonr retains all right, title, and interest in and to the Software and any copies thereof. The Software is protected by copyright and other intellectual property laws and treaties. Nothing in this EULA shall be construed as granting you any rights or licenses in or to the Software or any patents, trademarks, trade secrets, or other intellectual property rights of DriveClonr.
 

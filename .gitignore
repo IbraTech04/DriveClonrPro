@@ -1,5 +1,5 @@
 creds.json
 test.py
 failed_files.txt
-DriveClonr-Log-2023-06-29-23-07-20.txt
+DriveClonr-Log*.txt
 output/*
