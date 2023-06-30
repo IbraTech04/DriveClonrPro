@@ -22,6 +22,8 @@ class DriveDownloadr(tk.Frame):
         self.config = config
         self.creds = creds
 
+        self.failed_files = []
+        
         # We need to make a dict that maps each filetype to its representive method in this class
         
         # So the keys should look like this:
@@ -148,7 +150,7 @@ class DriveDownloadr(tk.Frame):
                         with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
                             f.write(fileio.getvalue())
                             f.close()
-                    except HttpError:
+                    except HttpError as e:
                         print("File too large to download normally. Downloading using export links")
                         self._download_using_export_links(file, current_dir, file_name, extension)
 
@@ -188,9 +190,13 @@ class DriveDownloadr(tk.Frame):
                     with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
                         f.write(fileio.getvalue())
                         f.close()
-                except HttpError:
-                    print("File too large to download normally. Downloading using export links")
-                    self._download_using_export_links(file, current_dir, file_name, extension)
+                except HttpError as e:
+                    if e.status_code == 403:
+                        print("File too large to download normally. Downloading using export links")
+                        self._download_using_export_links(file, current_dir, file_name, extension)
+                    else:
+                        print(f"Error downloading file {file['name']}")
+                        self.failed_files.append((file['name'], file['id']))
 
     def _download_using_export_links(self, file, current_dir: str, file_name: str, extension: str) -> None:
         """
@@ -325,7 +331,7 @@ class DriveDownloadr(tk.Frame):
         """
         Method to download a file as a png
         """
-        request = self.service.files().get_media(fileId=file_ID)
+        request = self.service.files().get_media(fileId=file_ID, supportsAllDrives=True)
         fh = io.BytesIO()
         downloader = MediaIoBaseDownload(fh, request)
         done = False

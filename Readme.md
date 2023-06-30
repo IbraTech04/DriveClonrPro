@@ -37,7 +37,7 @@ Coming Soon: A proper TreeView widget that allows the user to select which folde
 ## How does DriveClonrPro work?
 Simply put, I treat the Google Drive file structure like a massive tree and recurse through it using Postorder traversal, creating each folder as I recurse deeper. This would normally be a fast process, however each level of recursion requires a new call to the Google Drive API which slows down the process. 
 
-I'm not sure why I chose postorder traversal, but it works so I'm not complaining :shrug:. In hindsight I should've used in-order traversal, but if it works, it works.
+I'm not sure why I chose postorder traversal, but it works so I'm not complaining :shrug:. In hindsight I should've used level-order traversal, but if it works, it works.
 
 ## Known Issues
 1. DriveClonrPro does not check for ample space before cloning. This is something I aim to rectify in the future.
@@ -48,47 +48,47 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 ## Features:
 
 1. Auto LongFilePaths enabler on Windows
-    To avoid complex recursive file-path size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit (Unix go brrr). 
+    - To avoid complex recursive file-path size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit (Unix go brrr). 
 
 2. Unmatched Google Workspace Support
     - New with DriveClonrPro is the ability to specify what each type of Google Workspace document is converted to. For example, you can choose to convert all Google Docs to Microsoft Word documents and all Google Sheets to PDF documents. Unlike the legacy DriveClonr, you're no longer stuck with either-or. 
 
 3. Direct-Download. 
-    Unlike manually selecting files from Google Drive, DriveClonrPro directly downloads the files from Google Drive without the need for a compression intermediary (like .zip). This means that you don't have to worry about Google Drive's download limits - And also get instant access to your files :P
+    - Unlike manually selecting files from Google Drive, DriveClonrPro directly downloads the files from Google Drive without the need for a compression intermediary (like .zip). This means that you don't have to worry about Google Drive's download limits - And also get instant access to your files :P
 
 4. Cross-platform
-    A feature completely in the control of Tkinter and Python, I'm taking credit for it regardless :P. DriveClonrPro is cross-platform, meaning it works on Windows, macOS, and Linux. Granted, I've only tested it on Windows, but by PSMI (Pure Software MagIc™) it should work on macOS and Linux as well.
+    - A feature completely in the control of Tkinter and Python, I'm taking credit for it regardless :P. DriveClonrPro is cross-platform, meaning it works on Windows, macOS, and Linux. Granted, I've only tested it on Windows, but by PSMI (Pure Software MagIc™) it should work on macOS and Linux as well.
 
 5. Complete filesize support
-    Unlike its predecessor, DriveClonrPro supports cloning files of any size - Specifically exported Google Workspace documents. Whereas DriveClonr would have failed at cloning the file, DriveClonrPro is able to use export links to bypass the export limit and clone the file.
+    - Unlike its predecessor, DriveClonrPro supports cloning files of any size - Specifically exported Google Workspace documents. Whereas DriveClonr would have failed at cloning the file, DriveClonrPro is able to use export links to bypass the export limit and clone the file. 
 ## Planned Features:
 
 1. Multithreading
-    DriveClonrPro will be multithreaded, allowing it to clone multiple files at once. This will make the cloning process a lot faster. This feature is currently in development.
+    - DriveClonrPro will be multithreaded, allowing it to clone multiple files at once. This will make the cloning process a lot faster. This feature is currently in development.
 
 2. TreeView Widget
-    DriveClonrPro will have a proper TreeView widget that allows the user to select which folders to clone. This feature is currently in development.
+    - DriveClonrPro will have a proper TreeView widget that allows the user to select which folders to clone. This feature is currently in development.
 
 3. Dark Mode
-    DriveClonrPro will have a dark mode - Like basically every other program nowadays. This feature is currently in development.
+    - DriveClonrPro will have a dark mode - Like basically every other program nowadays. This feature is currently in development.
 
 4. Better Error Handling
-    Currently, DriveClonrPro will crash if any exception is thrown within the Google Drive API. This is something I aim to fix in the future.
+    - Currently, DriveClonrPro will crash if any exception is thrown within the Google Drive API. This is something I aim to fix in the future.
 
 5. Better Space Checking
-    Currently, DriveClonrPro does not check for ample space before cloning. This is something I aim to fix in the future.
+    - Currently, DriveClonrPro does not check for ample space before cloning. This is something I aim to fix in the future.
 
 6. Google Photos Cloning Support
-    If you're anything like me, you love having offline backups of your photos. At some point, I'd like to add support for cloning Google Photos to DriveClonrPro - This will definitely tie into the multithreading feature.
+    - If you're anything like me, you love having offline backups of your photos. At some point, I'd like to add support for cloning Google Photos to DriveClonrPro - This will definitely tie into the multithreading feature.
 
 7. More Personalized UI
-    I am lazy, and as such did not utilize the Google People API in this application at all. At some point, I'd like to utilize this API to make the UI more personalized to the user (i.e, name, profile picture, etc.)
+    - I am lazy, and as such did not utilize the Google People API in this application at all. At some point, I'd like to utilize this API to make the UI more personalized to the user (i.e, name, profile picture, etc.)
 
 8. Dealing with files too large to be exported with the API
-    Some files don't like to be exported with the Google Drive API. I'm not sure why Google doesn't allow this, but it's something I'd like to remedy in the future to maintain the 1:1 clone. 
+    - Some files don't like to be exported with the Google Drive API. I'm not sure why Google doesn't allow this, but it's something I'd like to remedy in the future to maintain the 1:1 clone. 
 
 9. Shared Drives Cloning
-    As of right now, DriveClonrPro only supports cloning files from your personal Google Drive. At some point, I'd like to add support for Shared Drives as well - To fully honor the name "Clonr"
+    - As of right now, DriveClonrPro only supports cloning files from your personal Google Drive. At some point, I'd like to add support for Shared Drives as well - To fully honor the name "Clonr"
 
 10. Language Support
-    At some point I'd like to add support for languages other than English - Mostly as a challenge to myself but also to make DriveClonr more accessible to non-English speakers.
+    - At some point I'd like to add support for languages other than English - Mostly as a challenge to myself but also to make DriveClonr more accessible to non-English speakers.
