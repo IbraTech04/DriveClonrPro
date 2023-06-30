@@ -152,18 +152,18 @@ class DriveDownloadr(tk.Frame):
                 if not os.path.exists(f"{current_dir}/{file_name}{extension}"):
                     downloader = self.downloaders.get(file['mimeType'], self._download_normal)
                     try:
-                        print(f"{time.strftime('%H:%M:%S')} Attempting to download file {file['name']}")
+                        print(f"{time.strftime('%H:%M:%S')} Attempting to download file {file['name']}", file=self.log_file)
                         fileio = downloader(file['id'])
                         with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
                             f.write(fileio.getvalue())
                             f.close()
                     except HttpError as e:
-                        print(f"{time.strftime('%H:%M:%S')} Error downloading file {file['name']}. Trying to recover...")
+                        print(f"{time.strftime('%H:%M:%S')} Error downloading file {file['name']}. Trying to recover...", file=self.log_file)
                         if e.reason == "This file is too large to be exported.":
-                            print(f"{time.strftime('%H:%M:%S')} Downloading file {file['name']} using export links")
+                            print(f"{time.strftime('%H:%M:%S')} Downloading file {file['name']} using export links", file=self.log_file)
                             self._download_using_export_links(file, current_dir, file_name, extension)
                         else:
-                            print(f"{time.strftime('%H:%M:%S')} Unknown error occured downloading file {file['name']}: {e}")
+                            print(f"{time.strftime('%H:%M:%S')} Unknown error occured downloading file {file['name']}: {e}", file=self.log_file)
                             self.failed_files.append((file['name'], file['id']))
 
         # If we're here, cloning is complete. Show the new screen

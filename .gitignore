@@ -1,3 +1,5 @@
 creds.json
 output/*
 test.py
+failed_files.txt
+DriveClonr-Log*.txt
