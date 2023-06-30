@@ -6,7 +6,9 @@ import os
 from ReadyToStart import ReadyToStart
 import winreg
 import psutil
-GOOGLE_WORKSPACE_MIMETYPES = {"Docs": "application/vnd.google-apps.document", "Sheets": "application/vnd.google-apps.spreadsheet", "Slides": "application/vnd.google-apps.presentation"}
+GOOGLE_WORKSPACE_MIMETYPES = {"Docs": "application/vnd.google-apps.document", "Sheets": "application/vnd.google-apps.spreadsheet", "Slides": "application/vnd.google-apps.presentation", "Drawings": "application/vnd.google-apps.drawing"}
+
+MIMETYPES = {"Word": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Excel": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "PowerPoint": "application/vnd.openxmlformats-officedocument.presentationml.presentation", "PDF": "application/pdf", "JPEG": "image/jpeg", "PNG": "image/png", "SVG": "image/svg+xml", "HTML": "text/html", "Plain Text": "text/plain", "OpenOffice Writer": "application/vnd.oasis.opendocument.text", "OpenOffice Calc": "application/vnd.oasis.opendocument.spreadsheet", "OpenOffice Impress": "application/vnd.oasis.opendocument.presentation"}
 
 class ConfigWindow(tk.Frame):
     """
@@ -54,11 +56,12 @@ class ConfigWindow(tk.Frame):
         self.doc_frame.pack(pady=10)
 
         # Document type labels and export options
-        self.doc_labels = ["Sheets", "Docs", "Slides"]
+        self.doc_labels = ["Docs", "Slides", "Sheets", "Drawings"]
         self.doc_export_options = {
-            "Sheets": "Excel",
-            "Docs": "Word",
-            "Slides": "PowerPoint"
+            "Docs": ["PDF", "Word", "OpenOffice Writer"],
+            "Slides": ["PDF", "PowerPoint", "OpenOffice Impress"],
+            "Sheets": ["PDF", "Excel", "OpenOffice Calc"],
+            "Drawings": ["PNG", "PDF", "JPEG", "SVG"]
         }
 
         self.doc_vars = []
@@ -66,16 +69,21 @@ class ConfigWindow(tk.Frame):
 
         for doc_label in self.doc_labels:
             var = tk.StringVar()
-            var.set("PDF")  # Default export option
+
+            if doc_label == "Drawings":
+                var.set("PNG")  # Default export option for Drawings
+            else:
+                var.set(self.doc_export_options[doc_label][1])  # Default Office equivalent
 
             label = ttk.Label(self.doc_frame, text=doc_label)
             label.pack(side=tk.LEFT, padx=10)
 
-            dropdown = ttk.OptionMenu(self.doc_frame, var, "PDF", "PDF", self.doc_export_options[doc_label])
+            dropdown = ttk.OptionMenu(self.doc_frame, var, var.get(), *self.doc_export_options[doc_label])
             dropdown.pack(side=tk.LEFT)
 
             self.doc_vars.append(var)
             self.doc_dropdowns.append(dropdown)
+
 
         # Destination directory selection
         self.destination_frame = ttk.Frame(self.parent)
@@ -136,7 +144,7 @@ class ConfigWindow(tk.Frame):
         
         # Step Three: Add the mime types and export options for Google Workspace documents
         for i, doc_label in enumerate(self.doc_labels):
-            config["mime_types"][GOOGLE_WORKSPACE_MIMETYPES[doc_label]] = self.doc_vars[i].get()
+            config["mime_types"][GOOGLE_WORKSPACE_MIMETYPES[doc_label]] = MIMETYPES[self.doc_vars[i].get()]
         
         # Finally, add the check status for Shared with Me and My Drive
         config["shared"] = self.shared_var.get()

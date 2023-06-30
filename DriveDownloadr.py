@@ -12,6 +12,8 @@ import re
 import requests
 import time
 
+MIMETYPE_EXTENSIONS = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx", "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx", "application/pdf": ".pdf", "image/jpeg": ".jpg", "image/png": ".png", "image/svg+xml": ".svg", "application/vnd.oasis.opendocument.text": ".odt", "application/vnd.oasis.opendocument.spreadsheet": ".ods", "application/vnd.oasis.opendocument.presentation": ".odp"}
+
 class DriveDownloadr(tk.Frame):
     """
     Class which contains all the methods related to actually cloning the user's drive
@@ -25,50 +27,22 @@ class DriveDownloadr(tk.Frame):
 
         self.failed_files = []
         
-        # We need to make a dict that maps each filetype to its representive method in this class
-        
-        # So the keys should look like this:
-        
-        # "application/vnd.google-apps.document": self.download_as_pdf, <= iff self.config['mime_types']['docs'] == "pdf"
-        
-        # Step one: make a default mimetype mapping 
-        # Docs => Word
-        # Sheets => Excel
-        # Slides => Powerpoint
-        # Drawings => PNG
-        # Jamboard => PDF
-        self.downloaders = {
-            "application/vnd.google-apps.document": self._download_as_docx,
-            "application/vnd.google-apps.spreadsheet": self._download_as_xlsx,
-            "application/vnd.google-apps.presentation": self._download_as_pptx,
-            "application/vnd.google-apps.drawing": self._download_as_png,
-            "application/vnd.google-apps.jam": self._download_as_pdf
-            }
-        
-        self.extensions = {
-            "application/vnd.google-apps.document": ".docx",
-            "application/vnd.google-apps.spreadsheet": ".xlsx",
-            "application/vnd.google-apps.presentation": ".pptx",
-            "application/vnd.google-apps.drawing": ".png",
-            "application/vnd.google-apps.jam": ".pdf"
-        }
+        # We need to make a dict that maps each MimeType to the corresponding export MimeType
+        # Example: {"application/vnd.google-apps.document": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}
         
         self.mime_type_mapping = {
-            "application/vnd.google-apps.document": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "application/vnd.google-apps.spreadsheet": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "application/vnd.google-apps.presentation": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-            "application/vnd.google-apps.drawing": "image/png",
-            "application/vnd.google-apps.jam": "application/pdf"
+            config_setting: self.config['mime_types'][config_setting]
+            for config_setting in self.config['mime_types']
+        }
+            
+        self.extensions = {
+            mime_type: MIMETYPE_EXTENSIONS[self.mime_type_mapping[mime_type]]
+            for mime_type in self.mime_type_mapping
         }
         
-        
-        # Now, iterate through the config dict and update the downloaders dict accordingly
-        for setting in self.config['mime_types']:
-            # If any one of them is PDF, update the downloaders dict accordingly
-            if self.config['mime_types'][setting] == "PDF":
-                self.downloaders[setting] = self._download_as_pdf
-                self.extensions[setting] = ".pdf"
-                self.mime_type_mapping[setting] = "application/pdf"
+        # Add jamboard to both as PDF
+        self.mime_type_mapping['application/vnd.google-apps.jam'] = 'application/pdf'
+        self.extensions['application/vnd.google-apps.jam'] = '.pdf'
 
         # Header Text:
         self.header_text = ttk.Label(self, text="Cloning your Google Drive", font=("Helvetica", 16, "bold"))
@@ -150,10 +124,10 @@ class DriveDownloadr(tk.Frame):
                 self.current_file.update()
                 extension = self.extensions.get(file['mimeType'], "")
                 if not os.path.exists(f"{current_dir}/{file_name}{extension}"):
-                    downloader = self.downloaders.get(file['mimeType'], self._download_normal)
+                    mime_type = self.mime_type_mapping.get(file['mimeType'], None)
                     try:
                         print(f"{time.strftime('%H:%M:%S')} Attempting to download file {file['name']}", file=self.log_file)
-                        fileio = downloader(file['id'])
+                        fileio = self._download_file(file['id'], mime_type)
                         with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
                             f.write(fileio.getvalue())
                             f.close()
@@ -164,22 +138,25 @@ class DriveDownloadr(tk.Frame):
                             self._download_using_export_links(file, current_dir, file_name, extension)
                         else:
                             print(f"{time.strftime('%H:%M:%S')} Unknown error occured downloading file {file['name']}: {e}", file=self.log_file)
-                            self.failed_files.append((file['name'], file['id']))
+                            self.failed_files.append((file['name'], file['id'], e.reason))
 
         # If we're here, cloning is complete. Show the new screen
         with open("failed_files.txt", 'w') as f:
             for file in self.failed_files:
-                f.write(f"{file[0]}: {file[1]}\n")
+                f.write(f"{file[0]} ({file[1]}): {file[2]}\n")
             f.close()
         self.log_file.flush()
         self.pb.stop()
         self.pb.destroy()
         self.current_file.destroy()
         self.header_text['text'] = "Cloning Complete!"  
+        # Set self.stage to apply word wrap
+        self.stage['wraplength'] = 500
         self.stage['text'] = "Your Google Drive has been cloned to your computer. You can view failed files in failed_files.txt, found in the same directory as your cloned files."
+        self.directory_button = tk.Label(self, text="Open Cloned Directory", fg="blue", cursor="hand2")
+        self.directory_button.bind("<Button-1>", lambda e: self._open_directory())
+        self.directory_button.grid(row=3, column=15, pady=10)
         
-        
-
     def _download(self, folder_id: str, current_dir: str) -> int:
         """
         Helper method for start_download which downloads all the files in a given folder
@@ -203,12 +180,12 @@ class DriveDownloadr(tk.Frame):
             file_name = self._sanitize_filename(file['name'])
             self.current_file['text'] = f"Current File: {file['name']}"
             self.current_file.update()            
-            extension = self.extensions.get(file['mimeType'], '')
+            extension = self.extensions.get(file['mimeType'], "")
             if not os.path.exists(f"{current_dir}/{file_name}{extension}"):
-                downloader = self.downloaders.get(file['mimeType'], self._download_normal)
+                mime_type = self.mime_type_mapping.get(file['mimeType'], None)
                 try:
                     print(f"{time.strftime('%H:%M:%S')} Attempting to download file {file['name']}", file=self.log_file)
-                    fileio = downloader(file['id'])
+                    fileio = self._download_file(file['id'], mime_type)
                     with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
                         f.write(fileio.getvalue())
                         f.close()
@@ -220,6 +197,12 @@ class DriveDownloadr(tk.Frame):
                     else:
                         print(f"{time.strftime('%H:%M:%S')} Unknown error occured downloading file {file['name']}: {e}", file=self.log_file)
                         self.failed_files.append((file['name'], file['id']))
+
+    def _open_directory(self):
+        """
+        Opens the cloned directory in the file explorer
+        """
+        os.startfile(self.config['destination'])
 
     def _download_using_export_links(self, file, current_dir: str, file_name: str, extension: str) -> None:
         """
@@ -281,7 +264,7 @@ class DriveDownloadr(tk.Frame):
         # Remove emojis from the filename
         sanitized_filename = emoji_pattern.sub('', sanitized_filename)
 
-        # Check for reserved folder names in Windows
+        # Check for reserved folder names in Windows - because Microsoft doesn't wanna let go of DOS
         reserved_names = ['con', 'aux', 'nul', 'prn', 'com1', 'lpt1', 'com2', 'lpt2',
                         'com3', 'lpt3', 'com4', 'lpt4', 'com5', 'lpt5', 'com6',
                         'lpt6', 'com7', 'lpt7', 'com8', 'lpt8', 'com9', 'lpt9']
@@ -291,72 +274,15 @@ class DriveDownloadr(tk.Frame):
             sanitized_filename += '_'
 
         return sanitized_filename.strip()
-
-    def _download_as_pdf(self, file_ID):
+    
+    def _download_file(self, file_ID, mime_type = None):
         """
-        Method to download a file as a pdf
+        Method to download a file with the specified MIME type
         """
-        request = self.service.files().export_media(fileId=file_ID, mimeType='application/pdf')
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fh, request)
-        done = False
-        while done is False:
-            status, done = downloader.next_chunk()
-        return fh
-
-    def _download_as_docx(self, file_ID):
-        """
-        Method to download a file as a docx
-        """
-        request = self.service.files().export_media(fileId=file_ID, mimeType='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fh, request)
-        done = False
-        while done is False:
-            status, done = downloader.next_chunk()
-        return fh
-
-    def _download_as_xlsx(self, file_ID):
-        """
-        Method to download a file as a xlsx
-        """
-        request = self.service.files().export_media(fileId=file_ID, mimeType='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fh, request)
-        done = False
-        while done is False:
-            status, done = downloader.next_chunk()
-        return fh
-
-    def _download_as_pptx(self, file_ID):
-        """
-        Method to download a file as a pptx
-        """
-        request = self.service.files().export_media(fileId=file_ID, mimeType='application/vnd.openxmlformats-officedocument.presentationml.presentation')
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fh, request)
-        done = False
-        while done is False:
-            status, done = downloader.next_chunk()
-        return fh
-
-    def _download_as_png(self, file_ID):
-        """
-        Method to download a file as a png
-        """
-        request = self.service.files().export_media(fileId=file_ID, mimeType='image/png')
-        fh = io.BytesIO()
-        downloader = MediaIoBaseDownload(fh, request)
-        done = False
-        while done is False:
-            status, done = downloader.next_chunk()
-        return fh
-
-    def _download_normal(self, file_ID):
-        """
-        Method to download a file as a png
-        """
-        request = self.service.files().get_media(fileId=file_ID, supportsAllDrives=True, supportsTeamDrives=True)
+        if mime_type is None:
+            request = self.service.files().get_media(fileId=file_ID)
+        else:
+            request = self.service.files().export_media(fileId=file_ID, mimeType=mime_type)
         fh = io.BytesIO()
         downloader = MediaIoBaseDownload(fh, request)
         done = False
