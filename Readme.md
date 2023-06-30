@@ -71,10 +71,10 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
     - DriveClonrPro will have a dark mode - Like basically every other program nowadays. This feature is currently in development.
 
 4. Better Error Handling
-    - Currently, DriveClonrPro will crash if any exception is thrown within the Google Drive API. This is something I aim to fix in the future.
+    - Currently, DriveClonrPro isn't equipped to handle every possible error. I aim to add more recoverable errors in the future.
 
-5. Better Space Checking
-    - Currently, DriveClonrPro does not check for ample space before cloning. This is something I aim to fix in the future.
+5. Shared Drive Support
+    - DriveClonrPro will support cloning files from Shared Drives. This feature is currently in development.
 
 6. Google Photos Cloning Support
     - If you're anything like me, you love having offline backups of your photos. At some point, I'd like to add support for cloning Google Photos to DriveClonrPro - This will definitely tie into the multithreading feature.
@@ -82,11 +82,5 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 7. More Personalized UI
     - I am lazy, and as such did not utilize the Google People API in this application at all. At some point, I'd like to utilize this API to make the UI more personalized to the user (i.e, name, profile picture, etc.)
 
-8. Dealing with files too large to be exported with the API
-    - Some files don't like to be exported with the Google Drive API. I'm not sure why Google doesn't allow this, but it's something I'd like to remedy in the future to maintain the 1:1 clone. 
-
-9. Shared Drives Cloning
-    - As of right now, DriveClonrPro only supports cloning files from your personal Google Drive. At some point, I'd like to add support for Shared Drives as well - To fully honor the name "Clonr"
-
-10. Language Support
+8. Language Support
     - At some point I'd like to add support for languages other than English - Mostly as a challenge to myself but also to make DriveClonr more accessible to non-English speakers.

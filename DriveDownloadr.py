@@ -225,7 +225,7 @@ class DriveDownloadr(tk.Frame):
                         self._download_using_export_links(file, current_dir, file_name, extension)
                     else:
                         print(f"{time.strftime('%H:%M:%S')} Unknown error occured downloading file {file['name']}: {e}", file=self.log_file)
-                        self.failed_files.append((file['name'], file['id']))
+                        self.failed_files.append((file['name'], file['id'], e.reason))
 
     def _open_directory(self) -> None:
         """
