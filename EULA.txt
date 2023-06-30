@@ -1,38 +1,34 @@
-DriveClonr End User License Agreement
+DriveClonrPro End User License Agreement (EULA)
 
-This End User License Agreement (EULA) is a legal contract between you (either an individual or a single entity) and DriveClonr, the developer and owner of the software product DriveClonr (the Software).
+Last Updated: 2023-06-30
 
-By installing, copying, or otherwise using the Software, you agree to be bound by the terms of this EULA. If you do not agree to the terms of this EULA, do not install or use the Software.
+Thank you for choosing IbraSoft DriveClonrPro 2023! 
 
-1. Grant of License. DriveClonr grants you a non-exclusive, non-transferable, revocable, and limited license to use the Software on a single computer or device for your personal or internal business purposes, subject to the terms and conditions of this EULA.
+This End-User License Agreement (the "Agreement") is a legal agreement between you (referred to herein as "Licensee" or "you") and IbraSoft (referred to herein as "Licensor" or "we"), governing your use of the DriveClonrPro application (referred to herein as the "Application"). By installing, accessing, or using the Application, you agree to be bound by the terms and conditions of this Agreement. If you do not agree to the terms of this Agreement, you should not install, access, or use the Application.
 
-2. Restrictions. "You are granted the following permissions regarding the Software, provided that such use complies with the terms and conditions of the MIT Open Source License:
+1. License Grant:
+   1.1 License for Non-Commercial Use: The Application is provided to you free of charge for non-commercial purposes. Licensor grants you a limited, non-exclusive, non-transferable, revocable license to use the Application for non-commercial use only.
+   1.2 License for Commercial Use: If you intend to use the Application for commercial purposes, you must obtain a separate commercial license from Licensor. Commercial use includes, but is not limited to, any use of the Application for financial gain, directly or indirectly.
 
-(a) You are free to copy, modify, adapt, translate, reverse engineer, decompile, disassemble, or create derivative works based on the Software.
+2. Intellectual Property:
+   2.1 Ownership: The Application, including but not limited to any and all copyrights, trademarks, patents, and other intellectual property rights therein, is and shall remain the sole property of Licensor.
+   2.2 Restrictions: You may not copy, modify, distribute, sell, lease, sublicense, or reverse engineer the Application or any part thereof, except as expressly permitted by applicable law.
 
-(b) You may rent, lease, lend, sell, sublicense, distribute, or otherwise transfer the Software or any rights therein to any third party, in accordance with the MIT Open Source License.
+3. Data Collection and Privacy:
+   3.1 Anonymous Diagnostic Data: The Application may collect anonymous diagnostic data for debugging and software improvement purposes. This data is collected to enhance the performance, stability, and usability of the Application.
+   3.2 Personally Identifiable Data: The Application will never collect or sell personally identifiable data. Licensor respects your privacy and is committed to protecting any personal information that may be collected during your use of the Application. Please refer to our Privacy Policy for more information on how we handle and protect your data.
 
-(c) You may remove any proprietary notices or labels on the Software, provided that the attribution requirements of the MIT Open Source License are satisfied.
+4. Warranty and Disclaimer:
+   4.1 No Warranty: The Application is provided "as is" and without warranty of any kind. Licensor makes no representations or warranties, whether express, implied, or statutory, regarding the Application or its suitability for any particular purpose.
+   4.2 Limitation of Liability: To the maximum extent permitted by applicable law, in no event shall Licensor be liable for any direct, indirect, incidental, consequential, or special damages arising out of or in connection with the use or inability to use the Application.
 
-(d) You may use the Software for any lawful purpose, authorized by the MIT Open Source License.
+5. Termination:
+   5.1 Termination by Licensee: You may terminate this Agreement at any time by uninstalling and ceasing all use of the Application.
+   5.2 Termination by Licensor: Licensor may terminate this Agreement if you fail to comply with any of the terms and conditions outlined herein.
+   5.3 Effect of Termination: Upon termination, you must cease all use of the Application and destroy any copies of the Application in your possession.
 
-(e) You shall comply with all applicable laws and regulations in connection with your use of the Software."
+6. Amendments:
+   Licensor reserves the right, at its sole discretion, to modify or replace this Agreement at any time. Your continued use of the Application after any such changes constitutes your acceptance of the modified Agreement.
 
-3. Ownership. The Software is licensed, not sold, to you. DriveClonr retains all right, title, and interest in and to the Software and any copies thereof. The Software is protected by copyright and other intellectual property laws and treaties. Nothing in this EULA shall be construed as granting you any rights or licenses in or to the Software or any patents, trademarks, trade secrets, or other intellectual property rights of DriveClonr.
+By installing, accessing, or using the DriveClonrPro application, you acknowledge that you have read and understood this Agreement and agree to be bound by its terms and conditions.
 
-4. Data Collection and Privacy. The Software may collect and transmit certain diagnostic information about your computer or device and your use of the Software to DriveClonr for the purposes of improving the Software and providing you with technical support. The diagnostic information may include your operating system version, hardware configuration, software version, error logs, usage statistics, and other data. DriveClonr does not collect or transmit any personal information or data that is not related to the Software or its performance. DriveClonr respects your privacy and will not share your diagnostic information with any third parties without your consent, except as required by law or court order. You can opt out of data collection at any time by uninstalling the Software.
-
-5. Disclaimer of Warranties. THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. DRIVECLONR DOES NOT WARRANT THAT THE SOFTWARE WILL MEET YOUR REQUIREMENTS OR EXPECTATIONS, THAT THE SOFTWARE WILL BE UNINTERRUPTED, ERROR-FREE, SECURE, OR FREE OF VIRUSES OR OTHER HARMFUL COMPONENTS, OR THAT ANY DEFECTS IN THE SOFTWARE WILL BE CORRECTED. YOU ASSUME THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE.
-
-6. Limitation of Liability. IN NO EVENT SHALL DRIVECLONR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR EXEMPLARY DAMAGES (INCLUDING BUT NOT LIMITED TO DAMAGES FOR LOSS OF DATA, LOSS OF PROFITS, BUSINESS INTERRUPTION, OR PERSONAL INJURY) ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF OR INABILITY TO USE THE SOFTWARE, EVEN IF DRIVECLONR HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. IN ANY CASE, DRIVECLONR'S TOTAL LIABILITY UNDER THIS EULA SHALL NOT EXCEED THE AMOUNT PAID BY YOU FOR THE SOFTWARE. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF LIABILITY FOR CERTAIN DAMAGES, SO THE ABOVE LIMITATION MAY NOT APPLY TO YOU.
-
-7. Indemnification. You agree to indemnify, defend, and hold harmless DriveClonr and its affiliates, officers, directors, employees, agents, and licensors from and against any and all claims, liabilities, damages, costs, and expenses (including reasonable attorneys' fees) arising out of or related to your use of or inability to use the Software or your breach of this EULA.
-
-8. Termination. This EULA is effective until terminated by you or DriveClonr.
-You may terminate this EULA at any time by uninstalling the Software and destroying all copies thereof. DriveClonr may terminate this EULA at any time without notice if you fail to comply with any of its terms and conditions. Upon termination of this EULA, you must cease all use of the Software and destroy all copies thereof.
-
-9. Governing Law. This EULA shall be governed by and construed in accordance with the laws of the State of California, USA, without regard to its conflict of laws principles. You agree to submit to the exclusive jurisdiction of the state and federal courts located in San Francisco County, California, USA, for any dispute arising out of or related to this EULA.
-
-10. Entire Agreement. This EULA constitutes the entire agreement between you and DriveClonr regarding the Software and supersedes any prior or contemporaneous communications, representations, or agreements, whether oral or written. DriveClonr may amend this EULA at any time by posting a revised version on its website or by providing you with a notice of the amendment. Your continued use of the Software after the amendment becomes effective constitutes your acceptance of the amended EULA. If any provision of this EULA is held to be invalid or unenforceable by a court of competent jurisdiction, such provision shall be modified to the extent necessary to make it enforceable and the remaining provisions shall remain in full force and effect.
-
-This EULA has been fully generated by Bing Chat ^_^

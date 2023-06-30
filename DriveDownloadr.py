@@ -1,4 +1,3 @@
-import json
 import os
 from typing import TextIO
 from googleapiclient.discovery import build, Resource
@@ -13,7 +12,18 @@ import re
 import requests
 import time
 
-MIMETYPE_EXTENSIONS = {"application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx", "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx", "application/pdf": ".pdf", "image/jpeg": ".jpg", "image/png": ".png", "image/svg+xml": ".svg", "application/vnd.oasis.opendocument.text": ".odt", "application/vnd.oasis.opendocument.spreadsheet": ".ods", "application/vnd.oasis.opendocument.presentation": ".odp"}
+MIMETYPE_EXTENSIONS = {
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx", 
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ".xlsx", 
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation": ".pptx", 
+    "application/pdf": ".pdf", 
+    "image/jpeg": ".jpg", 
+    "image/png": ".png", 
+    "image/svg+xml": ".svg", 
+    "application/vnd.oasis.opendocument.text": ".odt", 
+    "application/vnd.oasis.opendocument.spreadsheet": ".ods", 
+    "application/vnd.oasis.opendocument.presentation": ".odp"
+}
 
 class DriveDownloadr(tk.Frame):
     """
@@ -311,7 +321,7 @@ class DriveDownloadr(tk.Frame):
             mime_type is a valid MIME type, and is a valid export option for the file
         """
         if mime_type is None:
-            request = self.service.files().get_media(fileId=file_ID)
+            request = self.service.files().get_media(fileId=file_ID, supportsAllDrives=True, supportsTeamDrives=True)
         else:
             request = self.service.files().export_media(fileId=file_ID, mimeType=mime_type)
         fh = io.BytesIO()

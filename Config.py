@@ -101,6 +101,55 @@ class ConfigWindow(tk.Frame):
 
         self.save_button = ttk.Button(self.parent, text="Save Configuration", command=self.save_configuration)
         self.save_button.pack(pady=20)
+        
+        # Learn what we can and can't clone:
+        self.learn_more = ttk.Button(self.parent, text="Learn what DriveClonrPro can and cannot clone", command=self.learn_more)
+        self.learn_more.pack(pady=20)
+    
+    def learn_more(self):
+        # Open a popup window explaining what we can and can't clone
+        self.learn_more_window = tk.Toplevel(self.parent)
+        self.learn_more_window.title("What can and can't be cloned?")
+        self.learn_more_window.geometry("500x500")
+        self.learn_more_window.resizable(False, False)
+
+        # Create a frame for better organization of content
+        frame = ttk.Frame(self.learn_more_window, padding=20)
+        frame.pack(fill=tk.BOTH, expand=True)
+
+        # Add a title label
+        title_label = ttk.Label(frame, text="What can and can't be cloned?", font=("Arial", 14, "bold"))
+        title_label.pack(pady=10)
+
+        # Add content labels with improved formatting
+        content_labels = [
+            "DriveClonrPro can clone:",
+            "• Files and folders in My Drive",
+            "• Google Workspace documents in My Drive (exported to your chosen format)",
+            "• Most files and folders shared with you*",
+            "  * Some files shared with you have download and export restrictions,",
+            "    which DriveClonrPro cannot bypass",
+            "  * Some files are inaccessible through DriveClonr due to limitations",
+            "    in the Google Drive API",
+            "• Files and folders in your Trash"
+        ]
+
+        for label_text in content_labels:
+            label = ttk.Label(frame, text=label_text, wraplength=450, justify=tk.LEFT)
+            label.pack(anchor=tk.W, pady=5)
+
+        # Add a note label
+        note_label = ttk.Label(frame, text="Note: DriveClonrPro cannot bypass certain restrictions imposed by "
+                                            "Google Drive or Google Workspace.", font=("Arial", 10), foreground="gray")
+        note_label.pack(pady=10)
+
+        # DriveClonrPro can clone: 
+        # - Files and folders in My Drive
+        # - Google Workspace documents in My Drive (Exported to your chosen format) despite their size
+        # - Most files and folders shared with you*
+            # * Some files shared with you have download and export restrictions, which DriveClonrPro cannot bypass
+            # * Some files are inaccessible through DriveClonr due to limitations in the Google Drive API
+        # - Files and folders in your Trash
 
     def browse_destination(self):
         """
