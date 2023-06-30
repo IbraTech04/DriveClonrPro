@@ -8,6 +8,7 @@ import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 from EULAScreen import EULAView
 import os
+import time
 
 class MainWindow():
     """
@@ -45,7 +46,7 @@ class MainWindow():
         self.tagline.pack(pady=5)
         
         # START BUTTON
-        self.start_button = ttk.Button(self.current_frame, text="Start Cloning!", command=lambda: self.transition(EULAView(self.parent)))
+        self.start_button = ttk.Button(self.current_frame, text="Start Cloning!", command=lambda: self.transition(EULAView(self.parent, self.log_file)))
         self.start_button.pack()
         
         self.current_frame.pack()
@@ -63,14 +64,31 @@ class MainWindow():
             tk.messagebox.showerror("Error", "creds.json not found. Please download it from the Google Cloud Console and place it in the same directory as this program.")
             self.parent.destroy()
             exit()
+
+        # Create a log file for this session - Used to debug 
+        current_time = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+        file_name = f"DriveClonr-Log-{current_time}.txt"
+        self.log_file = open(file_name, "w", encoding="utf-8")
+        print(f"Starting DriveClonrV2023, log file: {file_name}", file=self.log_file)
+        root.protocol("WM_DELETE_WINDOW", self.on_close)
         
     def transition(self, frame: ttk.Frame) -> None:
         """
         Transition to a new frame
         """
+        print(f"Transitioning to {frame.__class__.__name__}", file=self.log_file)
         self.current_frame.pack_forget()
         self.current_frame = frame
         self.current_frame.pack()
+
+    def on_close(self) -> None:
+        """
+        Called when the window is closed
+        """
+        print("Closing DriveClonrV2023", file=self.log_file)
+        self.log_file.flush()
+        self.log_file.close()
+        self.parent.destroy()
 
 if __name__ == "__main__":
     root = tk.Tk()

@@ -4,9 +4,11 @@ from tkinter.scrolledtext import ScrolledText
 from AccountSelectorScreen import AccountSelector
 
 class EULAView(tk.Frame):
-    def __init__(self, parent: tk.Tk) -> None:
+    def __init__(self, parent: tk.Tk, log_file) -> None:
         super().__init__(parent)
         self.parent = parent
+        self.log_file = log_file
+        print("Entered EULAView", file=self.log_file)
         legal_text = ttk.Label(self, text="But first, the legal stuff...", font=("Helvetica", 16, "bold"))
         legal_text.pack()
         eula_text = ScrolledText(self, wrap=tk.WORD)
@@ -43,5 +45,6 @@ class EULAView(tk.Frame):
         self.pack()
     
     def destroy(self):
+        print("User accepted EULA", file=self.log_file)
         super().destroy()
-        AccountSelector(self.parent).pack()
+        AccountSelector(self.parent, self.log_file).pack()

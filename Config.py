@@ -1,21 +1,23 @@
+import shutil
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import filedialog
 import os 
 from ReadyToStart import ReadyToStart
 import winreg
-
+import psutil
 GOOGLE_WORKSPACE_MIMETYPES = {"Docs": "application/vnd.google-apps.document", "Sheets": "application/vnd.google-apps.spreadsheet", "Slides": "application/vnd.google-apps.presentation"}
 
 class ConfigWindow(tk.Frame):
     """
     Configuration information for the Clone of the drive
     """
-    def __init__(self, parent: tk.Tk, service, creds):
+    def __init__(self, parent: tk.Tk, service, log_file):
         super().__init__(parent)
         self.parent = parent
         self.service = service
-        self.creds = creds
+        self.log_file = log_file
+        print("Entered ConfigWindow", file=self.log_file)
         
         # HEADER AND SUBHEADING        
         self.header = ttk.Label(self.parent, text="Configure your Clonr", font=("Helvetica", 16, "bold"))
@@ -100,13 +102,32 @@ class ConfigWindow(tk.Frame):
         # Step One: Make sure the user has entered a valid destination  
         destination = self.destination_entry.get()
         if not destination or not os.path.isdir(destination):
+            print(f"Invalid destination directory. Entered: {destination}", file=self.log_file)
             tk.messagebox.showerror("Error", "Please enter a valid destination directory.")
             return
 
         # Step one and a half: Make sure the user has selected at least one of Shared with Me or My Drive
         if not self.shared_var.get() and not self.my_drive_var.get() and not self.trashed.get():
+            print("No source(s) selected", file=self.log_file)
             tk.messagebox.showerror("Error", "Please select at least one of Shared with Me or My Drive.")
             return
+
+        # Get the total size of the Google Drive, along with the total free space on the host drive
+        drive_size = self.service.about().get(fields="storageQuota").execute()["storageQuota"]["usage"]
+        drive_size = int(drive_size) / (1024 ** 3)
+        print(f"Drive size: {drive_size} GB", file=self.log_file)
+        
+        clone_directory = self.destination_entry.get()
+        free = shutil.disk_usage(clone_directory)[2]
+        free = free / (1024 ** 3)
+        print(f"Free space: {free} GB", file=self.log_file)
+
+        # If the drive is larger than the free space, then the program will not run
+        if drive_size > free:
+            print("Not enough space", file=self.log_file)
+            # Make a popup warning the user that there is not enough space
+            tk.showwarning("Not Enough Space!", "There is not enough space on the drive you selected to clone your Google Drive. Please select a different drive.")
+            return            
 
         # Step Two: Create a dict with the configuration information relative to mime types
         config = {}
@@ -124,29 +145,33 @@ class ConfigWindow(tk.Frame):
         
         # Finally, check the registry for LongFilePathEnabled and set it to 1 if it's not already set
         # This is required for Windows to be able to create files with paths longer than 260 characters
-        
+        print(f"Current Config: {config}", file=self.log_file)
         if os.name == "nt":
+            print("Checking registry for LongPathsEnabled", file=self.log_file)
             try:
                 key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\FileSystem", 0, winreg.KEY_READ)
                 value, _ = winreg.QueryValueEx(key, "LongPathsEnabled")
                 if value != 1:
+                    print("LongPathsEnabled not set to 1", file=self.log_file)
+                    print("Attempting to change LongPathsEnabled to 1", file=self.log_file)
                     # Make a warning saying "we need to change this"
                     tk.messagebox.showwarning("Warning", "Clonr needs to change a registry setting to work properly. (LongPathsEnabled) This requires UAC elevation. Please click OK to continue.")
                     # Run the file called disable-file-limit.reg
                     os.system("disable-file-limit.reg")
-                    tk.messagebox.showinfo("Success", "The registry setting has been changed successfully! DriveClonr can continue.")              
-            except FileNotFoundError:
-                pass
+                    tk.messagebox.showinfo("Success", "The registry setting has been changed successfully! DriveClonr can continue.")     
+                    print("LongPathsEnabled set to 1", file=self.log_file)         
+            except Exception as e:
+                print("Error: ", e, file=self.log_file)
+                tk.messagebox.showerror("Error", "An unknown error occurred while trying to change the registry setting. DriveClonr cannot continue. Please check the logfile for more information. If you open an issue on GitHub, please include the logfile.")
+                exit(1)
 
         #Destroy all the widgets in the window
         widgets = self.parent.winfo_children()
         for widget in widgets:
             widget.destroy()
-
-        
         super().pack_forget()
         super().destroy()
-        ReadyToStart(self.parent, self.service, self.creds, config).pack()
+        ReadyToStart(self.parent, self.service, self.log_file, config).pack()
 
 
 if __name__ == "__main__":

@@ -10,17 +10,18 @@ import tkinter.ttk as ttk
 from threading import Thread
 import re
 import requests
+import time
 
 class DriveDownloadr(tk.Frame):
     """
     Class which contains all the methods related to actually cloning the user's drive
     """
     
-    def __init__(self, parent: tk.Tk, service: build, creds, config: dict):
+    def __init__(self, parent: tk.Tk, service: build, log_file, config: dict):
         super().__init__(parent)
         self.service = service
         self.config = config
-        self.creds = creds
+        self.log_file = log_file
 
         self.failed_files = []
         
@@ -106,6 +107,7 @@ class DriveDownloadr(tk.Frame):
         Method which traverses the users Google Drive and recursively calls the _download method
         Preconditions: self.service is not None and is a valid Google Drive API service
         """
+        print("Starting download", file=self.log_file)
         download_list = []
         if self.config['my_drive']:
             download_list.append("'root' in parents and trashed = false")
@@ -124,6 +126,7 @@ class DriveDownloadr(tk.Frame):
             
             # Make a folder in the destination directory corresponding to name_dict and download all the files in that folder
             if not os.path.exists(f"{self.config['destination']}/{name_dict[download_list[i]]}"):
+                print(f"Making directory {self.config['destination']}/{name_dict[download_list[i]]}", file=self.log_file)
                 os.mkdir(f"{self.config['destination']}/{name_dict[download_list[i]]}")
             current_dir = f"{self.config['destination']}/{name_dict[download_list[i]]}"
             
@@ -131,14 +134,17 @@ class DriveDownloadr(tk.Frame):
             root_folders = self._make_request(f"mimeType = 'application/vnd.google-apps.folder' and {query}")
             root_files = self._make_request(f"mimeType != 'application/vnd.google-apps.folder' and {query}")
             for folder in root_folders:
+                print(f"{time.strftime('%H:%M:%S')} Downloading folder {folder['name']}", file=self.log_file)
                 folder_name = self._sanitize_filename(folder['name'])
                 self.current_file['text'] = f"Current File: {folder['name']}"
                 self.current_file.update()
                 if not os.path.exists(f"{current_dir}/{folder_name}"):
+                    print(f"Making directory {current_dir}/{folder_name}", file=self.log_file)
                     os.mkdir(f"{current_dir}/{folder_name}")
                 folder_id = folder['id']
                 self._download(folder_id, f"{current_dir}/{folder_name}")
             for file in root_files:
+                print(f"{time.strftime('%H:%M:%S')} Downloading file {file['name']}", file=self.log_file)
                 file_name = self._sanitize_filename(file['name'])
                 self.current_file['text'] = f"Current File: {file['name']}"
                 self.current_file.update()
@@ -146,20 +152,32 @@ class DriveDownloadr(tk.Frame):
                 if not os.path.exists(f"{current_dir}/{file_name}{extension}"):
                     downloader = self.downloaders.get(file['mimeType'], self._download_normal)
                     try:
+                        print(f"{time.strftime('%H:%M:%S')} Attempting to download file {file['name']}")
                         fileio = downloader(file['id'])
                         with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
                             f.write(fileio.getvalue())
                             f.close()
                     except HttpError as e:
-                        print("File too large to download normally. Downloading using export links")
-                        self._download_using_export_links(file, current_dir, file_name, extension)
+                        print(f"{time.strftime('%H:%M:%S')} Error downloading file {file['name']}. Trying to recover...")
+                        if e.reason == "This file is too large to be exported.":
+                            print(f"{time.strftime('%H:%M:%S')} Downloading file {file['name']} using export links")
+                            self._download_using_export_links(file, current_dir, file_name, extension)
+                        else:
+                            print(f"{time.strftime('%H:%M:%S')} Unknown error occured downloading file {file['name']}: {e}")
+                            self.failed_files.append((file['name'], file['id']))
 
         # If we're here, cloning is complete. Show the new screen
+        with open("failed_files.txt", 'w') as f:
+            for file in self.failed_files:
+                f.write(f"{file[0]}: {file[1]}\n")
+            f.close()
+        self.log_file.flush()
         self.pb.stop()
         self.pb.destroy()
         self.current_file.destroy()
         self.header_text['text'] = "Cloning Complete!"  
-        self.stage['text'] = "Your Google Drive has been cloned to your computer. You can now close this window."
+        self.stage['text'] = "Your Google Drive has been cloned to your computer. You can view failed files in failed_files.txt, found in the same directory as your cloned files."
+        
         
 
     def _download(self, folder_id: str, current_dir: str) -> int:
@@ -171,14 +189,17 @@ class DriveDownloadr(tk.Frame):
         root_folders = self._make_request(f"mimeType = 'application/vnd.google-apps.folder' and '{folder_id}' in parents")
         root_files = self._make_request(f"mimeType != 'application/vnd.google-apps.folder' and '{folder_id}' in parents")
         for folder in root_folders:
+            print(f"{time.strftime('%H:%M:%S')} Downloading folder {folder['name']}", file=self.log_file)
             folder_name = self._sanitize_filename(folder['name'])
             folder_id = folder['id']
             self.current_file['text'] = f"Current File: {folder['name']}"
             self.current_file.update()
             if not os.path.exists(f"{current_dir}/{folder_name}"):
+                print(f"Making directory {current_dir}/{folder_name}", file=self.log_file)
                 os.mkdir(f"{current_dir}/{folder_name}")
             self._download(folder_id, f"{current_dir}/{folder_name}")
         for file in root_files:
+            print(f"{time.strftime('%H:%M:%S')} Downloading file {file['name']}", file=self.log_file)
             file_name = self._sanitize_filename(file['name'])
             self.current_file['text'] = f"Current File: {file['name']}"
             self.current_file.update()            
@@ -186,40 +207,44 @@ class DriveDownloadr(tk.Frame):
             if not os.path.exists(f"{current_dir}/{file_name}{extension}"):
                 downloader = self.downloaders.get(file['mimeType'], self._download_normal)
                 try:
+                    print(f"{time.strftime('%H:%M:%S')} Attempting to download file {file['name']}", file=self.log_file)
                     fileio = downloader(file['id'])
                     with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
                         f.write(fileio.getvalue())
                         f.close()
                 except HttpError as e:
-                    if e.status_code == 403:
-                        print("File too large to download normally. Downloading using export links")
+                    print(f"{time.strftime('%H:%M:%S')} Error downloading file {file['name']}. Trying to recover...", file=self.log_file)
+                    if e.reason == "This file is too large to be exported.":
+                        print(f"{time.strftime('%H:%M:%S')} Downloading file {file['name']} using export links", file=self.log_file)
                         self._download_using_export_links(file, current_dir, file_name, extension)
                     else:
-                        print(f"Error downloading file {file['name']}")
+                        print(f"{time.strftime('%H:%M:%S')} Unknown error occured downloading file {file['name']}: {e}", file=self.log_file)
                         self.failed_files.append((file['name'], file['id']))
 
     def _download_using_export_links(self, file, current_dir: str, file_name: str, extension: str) -> None:
         """
         Method used to work around the Google Drive API export size limitation
         """
-
+        print(f"{time.strftime('%H:%M:%S')} Starting download of {file['name']} using export links", file=self.log_file)
+        print(f"{time.strftime('%H:%M:%S')} Creating temporary permission for file {file['name']}", file=self.log_file)
         id = self.service.permissions().create(fileId=file['id'], body={"role": "reader", "type": "anyone", "allowFileDiscovery": False}).execute()                 
         links = file['exportLinks']
         link = links[self.mime_type_mapping[file['mimeType']]]
 
         # Now simply making a request to the link is insufficient because we need to add the authorization header
-        token_info = self.creds.to_json()
-        token_info = json.loads(token_info)
         
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",                        
-        }                                   
+        }                                 
+        print(f"{time.strftime('%H:%M:%S')} Making request to {link}", file=self.log_file)
         # Now we have a direct link to the file. We can download it using requests
         r = requests.get(link, headers=headers)
         with open(f"{current_dir}/{file_name}{extension}", 'wb') as f:
+            print(f"{time.strftime('%H:%M:%S')} Writing file {file['name']} to disk", file=self.log_file)
             f.write(r.content)
             f.close()
         # Now we need to revert the permissions back to what they were before   
+        print(f"{time.strftime('%H:%M:%S')} Removing temporary permission for file {file['name']}", file=self.log_file)
         self.service.permissions().delete(fileId=file['id'], permissionId=id['id']).execute()
 
     def _make_request(self, request: str) -> list:
@@ -331,7 +356,7 @@ class DriveDownloadr(tk.Frame):
         """
         Method to download a file as a png
         """
-        request = self.service.files().get_media(fileId=file_ID, supportsAllDrives=True)
+        request = self.service.files().get_media(fileId=file_ID, supportsAllDrives=True, supportsTeamDrives=True)
         fh = io.BytesIO()
         downloader = MediaIoBaseDownload(fh, request)
         done = False
