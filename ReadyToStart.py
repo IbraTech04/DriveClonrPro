@@ -3,10 +3,11 @@ import tkinter.ttk as ttk
 from typing import TextIO
 from PIL import Image, ImageTk
 from DriveDownloadr import DriveDownloadr
+from googleapiclient.discovery import Resource
 
 
 class ReadyToStart(tk.Frame):
-    def __init__(self, parent: tk.Tk, service, log_file: TextIO, config: dict):
+    def __init__(self, parent: tk.Tk, service: Resource, log_file: TextIO, config: dict):
         super().__init__(parent)
         self.parent = parent
         self.service = service

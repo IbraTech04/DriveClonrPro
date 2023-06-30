@@ -31,6 +31,10 @@ class DriveDownloadr(tk.Frame):
     config is a valid config dict that contains all the required keys
     mime_type_mapping[x] = the valid extension pair for extension[x]
     """
+    parent: tk.Tk
+    service: Resource
+    config: dict[any, any]
+    log_file: TextIO
     
     def __init__(self, parent: tk.Tk, service: Resource, log_file: TextIO, config: dict) -> None:
         super().__init__(parent)
