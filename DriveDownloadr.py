@@ -1,4 +1,6 @@
 import os
+from tkinter import messagebox
+import traceback
 from typing import TextIO
 from googleapiclient.discovery import build, Resource
 from googleapiclient.errors import HttpError
@@ -98,8 +100,23 @@ class DriveDownloadr(tk.Frame):
 
         self.pack()
         
+        # To simplify error handling, I'm gonna use the report_callback_exception method
+        tk.Tk.report_callback_exception = self.report_callback_exception
+                
         # Start a thread to analyze the drive
         self.analyze_thread = Thread(target=self.start_download).start()
+        
+    def report_callback_exception(self, *args):
+        """
+        Method which makes a popup window when an exception occurs
+        """
+        err = traceback.format_exception(*args)
+        # Log the error
+        print("".join(err), file=self.log_file)
+        # Finally, make a popup window
+        messagebox.showerror("Error", "An unknown error occurred while cloning your drive, and DriveClonr cannot continue. Please check the log file for more information.")
+        self.log_file.flush()
+        exit(1)
         
     
     def start_download(self) -> None:
