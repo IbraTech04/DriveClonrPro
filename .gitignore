@@ -3,3 +3,5 @@ test.py
 failed_files.txt
 DriveClonr-Log*.txt
 output/*
+bypasser.py
+response.json

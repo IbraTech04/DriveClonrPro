@@ -46,7 +46,7 @@ class ConfigWindow(tk.Frame):
         
         # Create a greyed out box for Google Photos - This is a feature coming soon
         self.google_photos_var = tk.BooleanVar()
-        self.google_photos_checkbox = ttk.Checkbutton(self.info_frame, text="Google Photos", variable=self.google_photos_var, state=tk.DISABLED)
+        self.google_photos_checkbox = ttk.Checkbutton(self.info_frame, text="Google Photos", variable=self.google_photos_var)
         self.google_photos_checkbox.pack()
         
         
@@ -207,6 +207,7 @@ class ConfigWindow(tk.Frame):
         config["shared"] = self.shared_var.get()
         config["my_drive"] = self.my_drive_var.get()
         config["trashed"] = self.trashed.get()
+        config["photos"] = self.google_photos_var.get()
         
         # Finally, check the registry for LongFilePathEnabled and set it to 1 if it's not already set
         # This is required for Windows to be able to create files with paths longer than 260 characters

@@ -59,10 +59,18 @@ class MainWindow():
         self.parent.resizable(False, False)
         self.parent.title("DriveClonr 2023.7")
         
+        # If the user isn't connected to the internet, don't start the program
+        # To check if the user is connected to the internet, the program tries to connect to google.com
+        import requests
+        try:
+            requests.get("https://google.com", timeout=5)
+        except requests.exceptions.ConnectionError:
+            tk.Message(self.parent, text="You are not connected to the internet. Please connect to the internet and try again.", icon="error").show()
+            exit()
+        
         # if a file called creds.json is not found in the same directory as the program, then the program will not run
         if not os.path.exists("creds.json"):
             tk.messagebox.showerror("Error", "creds.json not found. Please download it from the Google Cloud Console and place it in the same directory as this program.")
-            self.parent.destroy()
             exit()
 
         # Create a log file for this session - Used to debug 

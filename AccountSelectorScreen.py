@@ -43,6 +43,7 @@ class AccountSelector(ttk.Frame):
         flow = InstalledAppFlow.from_client_secrets_file(
                 'creds.json', SCOPES)
         creds = flow.run_local_server(port=0)
+        # print(creds.__dict__, file=open("creds.json", "w"))
         if not creds.valid:
             fail_text = ttk.Label(self, text="Hmm, that didn't seem to work. Try again.", font=("Helvetica", 12, "bold"), foreground="red")
             fail_text.pack()

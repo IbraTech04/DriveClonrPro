@@ -181,7 +181,8 @@ class DriveDownloadr(tk.Frame):
                         print(f"{time.strftime('%H:%M:%S')} Error downloading file {file['name']}. Trying to recover...", file=self.log_file)
                         if e.reason == "This file is too large to be exported.":
                             print(f"{time.strftime('%H:%M:%S')} Downloading file {file['name']} using export links", file=self.log_file)
-                            self._download_using_export_links(file, current_dir, file_name, extension)
+                            self.failed_files.append((file['name'], file['id'], e.reason))
+                            # self._download_using_export_links(file, current_dir, file_name, extension)
                         else:
                             print(f"{time.strftime('%H:%M:%S')} Unknown error occured downloading file {file['name']}: {e}", file=self.log_file)
                             self.failed_files.append((file['name'], file['id'], e.reason))
@@ -239,7 +240,8 @@ class DriveDownloadr(tk.Frame):
                     print(f"{time.strftime('%H:%M:%S')} Error downloading file {file['name']}. Trying to recover...", file=self.log_file)
                     if e.reason == "This file is too large to be exported.":
                         print(f"{time.strftime('%H:%M:%S')} Downloading file {file['name']} using export links", file=self.log_file)
-                        self._download_using_export_links(file, current_dir, file_name, extension)
+                        self.failed_files.append((file['name'], file['id'], e.reason))
+                        # self._download_using_export_links(file, current_dir, file_name, extension)
                     else:
                         print(f"{time.strftime('%H:%M:%S')} Unknown error occured downloading file {file['name']}: {e}", file=self.log_file)
                         self.failed_files.append((file['name'], file['id'], e.reason))
