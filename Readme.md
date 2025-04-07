@@ -6,9 +6,11 @@ Alas! The successor to the absolute mess of a codebase known as DriveClonr has e
 DriveClonrPro is a new take on the DriveClonr legacy, adding a GUI, proper OOP design, and a lot of other cool stuff. It's still in development, but it's already a lot better (and more importantly, stable) than DriveClonr.
 
 ## What happened to the `e` in DriveClon(e)rPro?
-Simply put, Clonr looks cooler than Cloner. This was a decision made late at night one faithful day during the original development of DriveClonr, and I'm sticking with it.
+
+Simply put, `Clonr` looks cooler than `Cloner`. This was a decision made late at night one faithful day during the original development of DriveClonr, and I'm sticking with it.
 
 ## Key differences between DriveClonr and DriveClonrPro
+
 1. DriveClonrPro uses Tkinter to create a basic GUI for the user to interact with. This makes it a lot easier to use than DriveClonr, which required the user to interact with the program through the terminal. I would've used PyQT5, but I've had trouble getting that to work on macOS, so I decided to go with Tkinter instead.
 
 2. DriveClonrPro allows the user to modify what each Google Workspace document type is converted to. For example, the user can choose to convert all Google Docs to Microsoft Word documents and all Google Sheets to PDF documents; You're no longer stuck with either-or. This is a feature that was requested by a user of DriveClonr, and I'm glad to finally be able to implement it.
@@ -23,35 +25,39 @@ Coming Soon: A proper TreeView widget that allows the user to select which folde
 ## How to use DriveClonrPro
 
 ### Prerequisites
+
 1. Python 3.9 or higher (I personally test this with Python 3.9.13, but it should work with any version of Python 3.9 or higher)
 2. The Google Drive API Python Library (Install with `pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib`)
 3. Anything else in `requirements.txt` (Install with `pip install -r requirements.txt`)
-4. Valid Google Drive API Credentials (See [this page](https://developers.google.com/workspace/guides/create-credentials) for more information on how to get these. This application requires OAuth 2.0 credentials, so make sure you create a JSON file with the credentials and place it in the same directory as the program. The code assumes the file is called `creds.json` but you can change this in the code if you want to.)
+4. Valid Google Drive API Credentials (See [this page](https://developers.google.com/workspace/guides/create-credentials) for more information on how to get these. This application requires OAuth 2.0 credentials, so make sure you create a JSON file with the credentials and place it in the `/assets` directory. The code assumes the file is called `creds.json` but you can change this in the code if you want to.)
 5. A Google Drive account with files to clone (duh)
 
 ### Installation
+
 1. Download precompiled binaries (if they exist) or clone this repository to your computer. Make sure to install dependencies (see `requirements.txt`) if you're cloning the repository.
-2. Place your `creds.json` file in the same directory as the program.
-3. Run `MainWindow.py` and follow the instructions on screen. It's that simple! 
+2. Place your `creds.json` file in the `/assets` directory. This file contains your Google Drive API credentials and is required for the program to work. If you don't have this file, the program will not work. You can get this file by following the instructions [here](https://developers.google.com/workspace/guides/create-credentials).
+3. Run `app.py` in your terminal or command prompt. This will start the program and open the GUI. If you're using Windows, you can also run `app.bat` to start the program. This will automatically set the LongFilePaths registry key for you.
 
 ## How does DriveClonrPro work?
+
 Simply put, I treat the Google Drive file structure like a massive tree and recurse through it using Postorder traversal, creating each folder as I recurse deeper. This would normally be a fast process, however each level of recursion requires a new call to the Google Drive API which slows down the process. 
 
 I'm not sure why I chose postorder traversal, but it works so I'm not complaining :shrug:. In hindsight I should've used level-order traversal, but if it works, it works.
 
 ## Known Issues
+
 1. Tkinter seems to not like the cloning screen; The layout of the objects moves around a lot when the length of the file name changes. This is something I aim to rectify in the future.
 2. The UI doesn't scale properly; it becomes blurry when scaled up. This is probably an issue with Tkinter that I don't think I can fix easily
 
-## Features:
+## Features
 
 1. Auto LongFilePaths enabler on Windows
     - To avoid complex recursive file-path size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit (Unix go brrr). 
 
 2. Unmatched Google Workspace Support
-    - New with DriveClonrPro is the ability to specify what each type of Google Workspace document is converted to. For example, you can choose to convert all Google Docs to Microsoft Word documents and all Google Sheets to PDF documents. Unlike the legacy DriveClonr, you're no longer stuck with either-or. 
+    - New with DriveClonrPro is the ability to specify what each type of Google Workspace document is converted to. For example, you can choose to convert all Google Docs to Microsoft Word documents and all Google Sheets to PDF documents. Unlike the legacy DriveClonr, you're no longer stuck with either-or.
 
-3. Direct-Download. 
+3. Direct-Download
     - Unlike manually selecting files from Google Drive, DriveClonrPro directly downloads the files from Google Drive without the need for a compression intermediary (like .zip). This means that you don't have to worry about Google Drive's download limits - And also get instant access to your files :P
 
 4. Cross-platform
@@ -59,7 +65,8 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 
 5. Complete filesize support
     - Unlike its predecessor, DriveClonrPro supports cloning files of any size - Specifically exported Google Workspace documents. Whereas DriveClonr would have failed at cloning the file, DriveClonrPro is able to use export links to bypass the export limit and clone the file. 
-## Planned Features:
+
+## Planned Features
 
 1. Multithreading
     - DriveClonrPro will be multithreaded, allowing it to clone multiple files at once. This will make the cloning process a lot faster. This feature is currently in development.
