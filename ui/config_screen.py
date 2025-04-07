@@ -2,16 +2,19 @@ import os
 import shutil
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-from core.constants import GOOGLE_WORKSPACE_MIMETYPES, EXPORT_MIMETYPES
+from typing import Optional
+from core.constants import EXPORT_OPTIONS, GOOGLE_WORKSPACE_MIMETYPES, EXPORT_MIMETYPES
 from core.utils import check_windows_registry_longpath
+from core.model.clonr_config import ClonrConfig
 import platform
 
 
 class ConfigScreen(tk.Frame):
-    def __init__(self, parent, controller, service):
+    def __init__(self, parent, controller, service, config: ClonrConfig):
         super().__init__(parent)
         self.controller = controller
         self.service = service
+        self.config = config
 
         ttk.Label(self, text="Configure Clonr Settings", font=("Helvetica", 16, "bold")).pack(pady=10)
         ttk.Label(self, text="Select export options and source folders", font=("Helvetica", 12)).pack()
@@ -35,20 +38,23 @@ class ConfigScreen(tk.Frame):
         ttk.Checkbutton(self.source_frame, text="Trash", variable=self.trashed).pack(anchor="w")
         ttk.Checkbutton(self.source_frame, text="Google Photos (Coming Soon)", variable=self.photos, state="disabled").pack(anchor="w")
 
+
     def init_export_section(self):
         self.export_frame = ttk.LabelFrame(self, text="Export Formats for Google Workspace Files")
         self.export_frame.pack(fill="x", padx=10, pady=10)
 
         self.doc_vars = {}
-        for doc_type, options in EXPORT_MIMETYPES.items():
-            pass  # Filled in dynamically per file type
-
         self.export_dropdowns = {}
+
         for label, mime in GOOGLE_WORKSPACE_MIMETYPES.items():
+            options = EXPORT_OPTIONS[mime]
+            default = options[0]
+
             ttk.Label(self.export_frame, text=label).pack(anchor="w", padx=5)
-            var = tk.StringVar(value="PDF")
-            dropdown = ttk.OptionMenu(self.export_frame, var, "PDF", *EXPORT_MIMETYPES.keys())
+            var = tk.StringVar(value=default)
+            dropdown = ttk.OptionMenu(self.export_frame, var, default, *options)
             dropdown.pack(anchor="w", padx=20, pady=2)
+
             self.doc_vars[mime] = var
 
     def init_destination_section(self):
@@ -61,7 +67,7 @@ class ConfigScreen(tk.Frame):
 
     def init_buttons(self):
         ttk.Button(self, text="Learn What We Can Clone", command=self.learn_more_popup).pack(pady=10)
-        ttk.Button(self, text="Continue ➡️", command=self.validate_and_continue).pack(pady=10)
+        ttk.Button(self, text="Start Cloning ➡️", command=self.validate_and_continue).pack(pady=10)
 
     def browse_folder(self):
         folder = filedialog.askdirectory()
@@ -72,10 +78,6 @@ class ConfigScreen(tk.Frame):
         dest = self.destination_path.get()
         if not dest or not os.path.isdir(dest):
             messagebox.showerror("Invalid Directory", "Please choose a valid destination folder.")
-            return
-
-        if not self.my_drive.get() and not self.shared.get() and not self.trashed.get():
-            messagebox.showerror("No Sources", "Please select at least one source to clone.")
             return
 
         if platform.system() == "Windows" and not check_windows_registry_longpath():
@@ -94,18 +96,13 @@ class ConfigScreen(tk.Frame):
             messagebox.showerror("Insufficient Space", "Not enough disk space to clone your Drive.")
             return
 
-        # Build config dict
-        config = {
-            "destination": dest,
-            "shared": self.shared.get(),
-            "my_drive": self.my_drive.get(),
-            "trashed": self.trashed.get(),
-            "photos": self.photos.get(),
-            "mime_types": {
-                mime: EXPORT_MIMETYPES[self.doc_vars[mime].get()]
-                for mime in self.doc_vars
-            }
+        self.config.destination = dest
+        self.config.mime_types = {
+            mime: EXPORT_MIMETYPES[self.doc_vars[mime].get()]
+            for mime in self.doc_vars
         }
+
+        print("Config:", self.config)
 
         # print("✅ Config validated. Proceeding...")
         # from ui.ready_screen import ReadyToStartScreen

@@ -1,9 +1,11 @@
 # ui/controller.py
 
 import tkinter as tk
+from core.model.clonr_config import ClonrConfig
 from ui.welcome_screen import WelcomeScreen
 from ui.login_screen import LoginScreen
 from ui.tree_screen import TreeSelectorScreen
+from ui.config_screen import ConfigScreen
 
 class AppController(tk.Tk):
     def __init__(self):
@@ -36,9 +38,8 @@ class AppController(tk.Tk):
         self.clear_screen()
         TreeSelectorScreen(self.container, self, service).pack(fill="both", expand=True)
     
-    def show_config_screen(self, service, config=None):
+    def show_config_screen(self, service, config: ClonrConfig):
         self.service = service
         self.clear_screen()
-        from ui.config_screen import ConfigScreen
-        ConfigScreen(self.container, self, service).pack(fill="both", expand=True)
+        ConfigScreen(self.container, self, service, config).pack(fill="both", expand=True)
 
