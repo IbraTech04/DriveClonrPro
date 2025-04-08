@@ -64,7 +64,7 @@ def walk_drive_tree(node: DriveNode, config: ClonrConfig, tasks, current_path=No
 
         tasks.append((node, file_path))
 
-def download_file(service: GoogleAuth, file_id, export_mime):
+def download_file(service: GoogleAuth, file_id, export_mime, progress_callback):
     """
     Download a file from Google Drive
     """
@@ -79,7 +79,10 @@ def download_file(service: GoogleAuth, file_id, export_mime):
         downloader = MediaIoBaseDownload(fh, request)
         done = False
         while not done:
-            _, done = downloader.next_chunk()
+            status, done = downloader.next_chunk()
+            percent = int(status.progress() * 100)
+            progress_callback("update", percent, 0)  # Update progress for the main thread
+
         fh.seek(0)
         return fh
     except HttpError as e:
@@ -108,7 +111,7 @@ def run_download_worker(service: GoogleAuth, config, log_file, tasks: Queue, pro
             
             try:
                 # Download the file
-                file_data = download_file(service, node.id, export_mime).read()
+                file_data = download_file(service, node.id, export_mime, progress_callback).read()
             
             except HttpError as e:
                 error_json = e.error_details[0]["reason"] if hasattr(e, 'error_details') else e.content
