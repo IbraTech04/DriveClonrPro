@@ -5,5 +5,5 @@ DriveClonr-Log*.txt
 output/*
 bypasser.py
 response.json
-*/__pycache__/
+*.py[cod]
 *.log

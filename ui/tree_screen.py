@@ -5,6 +5,7 @@ from tkinter import ttk
 from ttkwidgets import CheckboxTreeview
 from core.auth import GoogleAuth
 from core.model.clonr_config import ClonrConfig
+from core.photos import build_photos_tree
 from core.tree_builder import build_drive_tree, build_subtree
 from core.model.tree_node import DriveNode
 from core.utils import prune_checked_nodes
@@ -22,8 +23,19 @@ class TreeSelectorScreen(tk.Frame):
         self.auth = service
         self.node_map = {}
         self.virtual_root = None
+        self.photos_root = None
         self.loading_label = ttk.Label(self, text="Loading your drive...", font=("Helvetica", 14, "italic"))
         self.loading_label.pack(pady=20)
+
+        self.loading_caption = ttk.Label(
+            self,
+            text="Tip: We're parsing your Google Drive file structure into what's known as an AST (Abstract Syntax Tree) in Computer Science. This allows us to efficiently traverse and manipulate the file structure. It's like creating a family tree for your files! This will take a few seconds, relative to your drive size. Your patience is appreciated!",
+            font=("Helvetica", 10, "italic"),
+            wraplength=500,  
+            justify="left"   
+        )
+        self.loading_caption.pack(pady=10)
+
 
         self.spinner = ttk.Progressbar(self, mode="indeterminate")
         self.spinner.pack(pady=10)
@@ -45,24 +57,30 @@ class TreeSelectorScreen(tk.Frame):
         combined = build_drive_tree(my_files, shared_files, trash_files)
         self.virtual_root.children.extend(combined.children)
 
-        # Shared Drives
-        for drive in self.list_shared_drives():
-            drive_id = drive["id"]
-            drive_name = drive["name"]
-            files = self.query_shared_drive_files(drive_id)
 
-            if files:
-                self.virtual_root.add_child(build_subtree(files, drive_name))
-                # shared_drive_node = build_drive_tree(files, [], [])
-                # shared_drive_node.id = drive_id
-                # shared_drive_node.name = drive_name
-                # shared_drive_node.mime_type = "shared/drive"
-                # virtual_root.add_child(shared_drive_node)
+
+        # Shared Drives
+        # for drive in self.list_shared_drives():
+        #     drive_id = drive["id"]
+        #     drive_name = drive["name"]
+        #     files = self.query_shared_drive_files(drive_id)
+
+        #     if files:
+        #         self.virtual_root.add_child(build_subtree(files, drive_name))
+        #         # shared_drive_node = build_drive_tree(files, [], [])
+        #         # shared_drive_node.id = drive_id
+        #         # shared_drive_node.name = drive_name
+        #         # shared_drive_node.mime_type = "shared/drive"
+        #         # virtual_root.add_child(shared_drive_node)
+
+        self.photos_root = build_photos_tree(self.auth.creds)
+
         self.after(0, lambda: self.on_tree_build_complete())
 
 
     def on_tree_build_complete(self):
         self.spinner.stop()
+        self.loading_caption.destroy()
         self.spinner.destroy()
         self.loading_label.destroy()
 
@@ -84,18 +102,31 @@ class TreeSelectorScreen(tk.Frame):
 
         # 🌲 Insert your Drive nodes
         self.insert_drive_node(self.virtual_root, "")
-
+        self.insert_drive_node(self.photos_root, "")
         # ✅ Button under tree
         ttk.Button(self, text="Next ➡️", command=self.print_selection).pack(pady=10)
 
 
 
     def query(self, q):
-        return self.auth.service.files().list(
-            q=f"({q}) and mimeType != 'application/vnd.google-apps.form' and mimeType != 'application/vnd.google-apps.shortcut'",
-            pageSize=1000,
-            fields="files(id, name, mimeType, parents, owners)"
-        ).execute().get("files", [])
+        files = []
+        page_token = None
+
+        while True:
+            response = self.auth.service.files().list(
+                q=f"({q}) and mimeType != 'application/vnd.google-apps.form' and mimeType != 'application/vnd.google-apps.shortcut'",
+                pageSize=1000,
+                fields="nextPageToken, files(id, name, mimeType, parents, owners)",
+                pageToken=page_token
+            ).execute()
+
+            files.extend(response.get("files", []))
+            page_token = response.get("nextPageToken")
+
+            if not page_token:
+                break
+
+        return files
 
 
 
@@ -110,15 +141,28 @@ class TreeSelectorScreen(tk.Frame):
         return drives.get("drives", [])
 
     def query_shared_drive_files(self, drive_id: str):
-        return self.auth.service.files().list(
-            q="trashed = false and mimeType != 'application/vnd.google-apps.form' and mimeType != 'application/vnd.google-apps.shortcut'",
-            pageSize=1000,
-            fields="files(id, name, mimeType, parents, owners)",
-            corpora="drive",
-            driveId=drive_id,
-            includeItemsFromAllDrives=True,
-            supportsAllDrives=True
-        ).execute().get("files", [])
+        files = []
+        page_token = None
+
+        while True:
+            response = self.auth.service.files().list(
+                q="trashed = false and mimeType != 'application/vnd.google-apps.form' and mimeType != 'application/vnd.google-apps.shortcut'",
+                pageSize=1000,
+                fields="nextPageToken, files(id, name, mimeType, parents, owners)",
+                corpora="drive",
+                driveId=drive_id,
+                includeItemsFromAllDrives=True,
+                supportsAllDrives=True,
+                pageToken=page_token
+            ).execute()
+
+            files.extend(response.get("files", []))
+            page_token = response.get("nextPageToken")
+
+            if not page_token:
+                break
+
+        return files
 
 
     def print_selection(self):
@@ -128,28 +172,30 @@ class TreeSelectorScreen(tk.Frame):
             node = self.node_map[tree_id]
             node.is_checked = tree_id in checked_ids
 
-            # Sync children first (post-order)
             for child_id in self.tree.get_children(tree_id):
                 sync_all(child_id)
 
-            # If any child is checked, ensure parent is marked as checked too
             node.is_checked = node.is_checked or any(
                 self.node_map[child_id].is_checked for child_id in self.tree.get_children(tree_id)
             )
 
+        root_ids = self.tree.get_children()
+        for tree_id in root_ids:
+            sync_all(tree_id)
 
-        for top_level in self.tree.get_children():
-            sync_all(top_level)
+        virtual_root = DriveNode("virtual-root", "Selected Content", "virtual/root")
+        for tree_id in root_ids:
+            subtree = self.node_map[tree_id]
+            pruned = prune_checked_nodes(subtree)
+            if pruned and pruned.children:
+                virtual_root.add_child(pruned)
 
-        virtual_root_id = self.tree.get_children()[0]  # "Google Drive"
-        virtual_root = self.node_map[virtual_root_id]
-
-        pruned_root = prune_checked_nodes(virtual_root)
-        if not pruned_root or not pruned_root.children:
+        if not virtual_root.children:
             tk.messagebox.showerror("No files selected", "Please select at least one file or folder to clone.")
             return
 
-        config = ClonrConfig(selected_root=pruned_root)
+        config = ClonrConfig(selected_root=virtual_root)
         self.controller.show_config_screen(self.auth, config)
+
 
 

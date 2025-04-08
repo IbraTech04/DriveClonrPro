@@ -58,13 +58,6 @@ MIMETYPE_EXTENSIONS = {
     "application/rtf": ".rtf"
 }
 
-
-# MIMETYPE_TO_EXPORT_LINK = {
-#     "application/vnd.google-apps.document":
-#     "application/vnd.google-apps.spreadsheet": ["PDF", "Excel", "OpenOffice Calc"],
-#     "application/vnd.google-apps.presentation": ["PDF", "PowerPoint", "OpenOffice Impress"],
-# }
-
 DISCOVERY_SERVICE_URL = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
 
-SCOPES = ['https://www.googleapis.com/auth/drive']
+SCOPES = ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/photoslibrary']

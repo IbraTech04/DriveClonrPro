@@ -45,6 +45,11 @@ def walk_drive_tree(node: DriveNode, config: ClonrConfig, tasks, current_path=No
     if not node or not hasattr(node, 'name'):
         return
 
+    if node.mime_type.startswith("virtual/") or node.mime_type.startswith("photos/"):
+        for child in node.children:
+            walk_drive_tree(child, config, tasks)
+        return
+
     # Set base path
     current_path = current_path or config.destination
     node_path = os.path.join(current_path, sanitize_filename(node.name))
