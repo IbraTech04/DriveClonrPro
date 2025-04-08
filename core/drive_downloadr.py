@@ -11,6 +11,7 @@ from core.model.tree_node import DriveNode
 from core.utils import sanitize_filename, get_extension
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
+from core.utils import download_from_export_link
 
 class DownloadStats:
     def __init__(self):
@@ -84,7 +85,7 @@ def download_file(service: GoogleAuth, file_id, export_mime):
     except HttpError as e:
         raise e
 
-def run_download_worker(service, config, log_file, tasks: Queue, progress_callback, stats: DownloadStats, thread_id):
+def run_download_worker(service: GoogleAuth, config, log_file, tasks: Queue, progress_callback, stats: DownloadStats, thread_id):
     """
     Worker thread that processes download tasks from the queue
     """
@@ -105,12 +106,34 @@ def run_download_worker(service, config, log_file, tasks: Queue, progress_callba
             # Get the export MIME type (if applicable)
             export_mime = config.mime_types.get(node.mime_type)
             
-            # Download the file
-            file_data = download_file(service, node.id, export_mime)
+            try:
+                # Download the file
+                file_data = download_file(service, node.id, export_mime).read()
             
+            except HttpError as e:
+                error_json = e.error_details[0]["reason"] if hasattr(e, 'error_details') else e.content
+                if 'exportSizeLimitExceeded' in error_json:
+                    print("Export size limit exceeded for file:", node.name)
+                    log_file.write(f"Export size limit exceeded for file: {node.name}\n")
+
+                    # print the export links for the file
+                    file = service.service.files().get(
+                        fileId=node.id,
+                        fields="id, name, mimeType, exportLinks"
+                    ).execute()
+
+                    export_links = file.get("exportLinks")
+
+                    # Get the mimetype of the desired export format
+                    export_mime = config.mime_types.get(node.mime_type)
+
+                    file_data = download_from_export_link(service.creds.token, export_links[export_mime])
+                else:
+                    raise e
+
             # Write the file to disk
             with open(file_path, "wb") as f:
-                f.write(file_data.read())
+                f.write(file_data)
                 
             stats.downloaded += 1
             log_file.write(f"Successfully downloaded: {node.name} to {file_path}\n")
@@ -118,6 +141,7 @@ def run_download_worker(service, config, log_file, tasks: Queue, progress_callba
         except HttpError as e:
             stats.failed += 1
             log_file.write(f"Error downloading {node.name}: {str(e)}\n")
+
         except Exception as e:
             stats.failed += 1
             log_file.write(f"Unexpected error downloading {node.name}: {str(e)}\n")

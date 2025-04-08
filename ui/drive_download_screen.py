@@ -6,7 +6,7 @@ from queue import Queue
 import time
 
 class DriveDownloadScreen(tk.Frame):
-    def __init__(self, parent, controller, service, config, log_file, num_threads=4):
+    def __init__(self, parent, controller, service, config, log_file, num_threads=8):
         super().__init__(parent)
         self.controller = controller
         self.auth = service

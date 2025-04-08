@@ -35,10 +35,11 @@ class TreeSelectorScreen(tk.Frame):
 
     def query(self, q):
         return self.auth.service.files().list(
-            q=f"({q}) and mimeType != 'application/vnd.google-apps.form'",
+            q=f"({q}) and mimeType != 'application/vnd.google-apps.form' and mimeType != 'application/vnd.google-apps.shortcut'",
             pageSize=1000,
             fields="files(id, name, mimeType, parents, owners)"
         ).execute().get("files", [])
+
 
 
     def insert_drive_node(self, node: DriveNode, parent_id: str):
