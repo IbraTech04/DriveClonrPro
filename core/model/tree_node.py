@@ -1,13 +1,12 @@
 from __future__ import annotations
 
 class DriveNode:
-    def __init__(self, id: str, name: str, mime_type: str, is_checked=False, baseurl=""):
+    def __init__(self, id: str, name: str, mime_type: str, is_checked=False):
         self.id = id
         self.name = name
         self.mime_type = mime_type
         self.is_checked = is_checked
         self.children: list[DriveNode] = []
-        self.base_url = baseurl
 
     def add_child(self, child: DriveNode):
         self.children.append(child)
@@ -19,3 +18,15 @@ class DriveNode:
         print("  " * indent + f"{'[✔]' if self.is_checked else '[ ]'} {self.name}")
         for child in self.children:
             child.print_tree(indent + 1)
+
+class PhotosNode:
+    def __init__(self, id, name, mime_type, base_url=None, is_checked=False):
+        self.id = id
+        self.name = name
+        self.mime_type = mime_type
+        self.base_url = base_url
+        self.is_checked = is_checked
+        self.children = []
+
+    def add_child(self, node):
+        self.children.append(node)

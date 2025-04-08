@@ -7,3 +7,4 @@ bypasser.py
 response.json
 *.py[cod]
 *.log
+downloads/

@@ -3,9 +3,8 @@ from queue import Queue, Empty
 import time
 from io import BytesIO
 
-import httplib2
 from core import auth
-from core.auth import DISCOVERY_SERVICE_URL, GoogleAuth
+from core.auth import GoogleAuth
 from core.model.clonr_config import ClonrConfig
 from core.model.tree_node import DriveNode
 from core.utils import sanitize_filename, get_extension
