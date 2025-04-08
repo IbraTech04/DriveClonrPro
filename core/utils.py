@@ -5,7 +5,7 @@ import winreg
 import requests
 
 from typing import Optional, Union
-from .model.tree_node import DriveNode
+from .model.tree_node import DownloadableNode, DriveNode
 
 from core.constants import MIMETYPE_EXTENSIONS
 
@@ -26,26 +26,25 @@ def check_windows_registry_longpath():
         return False
 
 
-def prune_checked_nodes(node: DriveNode) -> DriveNode | None:
+def prune_checked_nodes(node: DownloadableNode) -> bool:
     """
-    Recursively builds a new DriveNode tree with only checked nodes and their checked descendants.
-    """
-    if not node.is_checked:
-        selected_children = [prune_checked_nodes(
-            child) for child in node.children]
-        selected_children = [child for child in selected_children if child]
-        if selected_children:
-            clone = DriveNode(node.id, node.name,
-                              node.mime_type, is_checked=False)
-            clone.children = selected_children
-            return clone
-        return None
+    Mutates the given DriveNode tree in place by pruning unchecked nodes 
+    that do not have any checked descendants.
 
-    # Node is checked
-    clone = DriveNode(node.id, node.name, node.mime_type, is_checked=True)
-    clone.children = [prune_checked_nodes(
-        child) for child in node.children if prune_checked_nodes(child)]
-    return clone
+    Returns:
+      True if this node should be kept (i.e. it is checked or it has any remaining children),
+      and False if it should be pruned.
+    """
+    # Process children recursively and filter out those that should be pruned.
+    new_children = []
+    for child in node.children:
+        if prune_checked_nodes(child):
+            new_children.append(child)
+    node.children = new_children  # Update the children in place.
+    
+    # Keep this node if it is checked or if it has any children after pruning.
+    return node.is_checked or bool(node.children)
+
 
 
 def sanitize_filename(filename: str) -> str:

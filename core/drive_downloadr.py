@@ -3,7 +3,6 @@ from queue import Queue, Empty
 import time
 from io import BytesIO
 
-import httplib2
 from core import auth
 from core.auth import DISCOVERY_SERVICE_URL, GoogleAuth
 from core.model.clonr_config import ClonrConfig
@@ -12,33 +11,10 @@ from core.utils import sanitize_filename, get_extension
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaIoBaseDownload
 from core.utils import download_from_export_link
+from core.model.download_stats import DownloadStats
 
-class DownloadStats:
-    def __init__(self):
-        self.total_files = 0
-        self.downloaded = 0
-        self.failed = 0
-        self.start_time = time.time()
 
-    def eta(self):
-        if self.downloaded == 0:
-            return "ETA: Calculating..."
-        elapsed = time.time() - self.start_time
-        avg_time = elapsed / self.downloaded
-        remaining = self.total_files - self.downloaded - self.failed
-        if remaining <= 0:
-            return "Download complete"
-        eta_seconds = int(remaining * avg_time)
-        
-        # Format the ETA into minutes and seconds for better readability
-        if eta_seconds < 60:
-            return f"ETA: {eta_seconds}s"
-        else:
-            minutes = eta_seconds // 60
-            seconds = eta_seconds % 60
-            return f"ETA: {minutes}m {seconds}s"
-
-def walk_drive_tree(node: DriveNode, config: ClonrConfig, tasks, current_path=None):
+def walk_drive_tree(node: DriveNode, config: ClonrConfig, tasks: Queue, current_path=None):
     """
     Recursively generate download tasks: (DriveNode, output_path)
     """
@@ -62,7 +38,7 @@ def walk_drive_tree(node: DriveNode, config: ClonrConfig, tasks, current_path=No
         extension = get_extension(config.mime_types.get(node.mime_type))
         file_path = node_path + extension
 
-        tasks.append((node, file_path))
+        tasks.put((node, file_path))
 
 def download_file(service: GoogleAuth, file_id, export_mime, progress_callback):
     """

@@ -1,20 +1,41 @@
 from __future__ import annotations
+from __future__ import annotations
+from abc import ABC, abstractmethod
 
-class DriveNode:
-    def __init__(self, id: str, name: str, mime_type: str, is_checked=False):
+class DownloadableNode(ABC):
+    id: str
+    name: str
+    mime_type: str
+    is_checked: bool
+    children: list[DownloadableNode]
+
+    def __init__(self, id, name, mime_type, is_checked=False):
         self.id = id
         self.name = name
         self.mime_type = mime_type
         self.is_checked = is_checked
-        self.children: list[DriveNode] = []
+        self.children = []
 
-    def add_child(self, child: DriveNode):
-        self.children.append(child)
+    def add_child(self, node):
+        self.children.append(node)
 
-    def __repr__(self):
-        return f"DriveNode(name={self.name}, id={self.id}, type={self.mime_type}, checked={self.is_checked}, children={len(self.children)})"
+    @abstractmethod
+    def is_folder(self) -> bool:
+        pass
 
-    def print_tree(self, indent=0):
-        print("  " * indent + f"{'[✔]' if self.is_checked else '[ ]'} {self.name}")
-        for child in self.children:
-            child.print_tree(indent + 1)
+class DriveNode(DownloadableNode):
+    def __init__(self, id, name, mime_type, is_checked=False):
+        super().__init__(id, name, mime_type, is_checked)
+
+    def is_folder(self) -> bool:
+        return self.mime_type == "application/vnd.google-apps.folder"
+
+class PhotosNode(DownloadableNode):
+    base_url: str
+    
+    def __init__(self, id, name, mime_type, is_checked=False, base_url=None):
+        super().__init__(id, name, mime_type, is_checked)
+        self.base_url = base_url
+
+    def is_folder(self) -> bool:
+        return self.mime_type == "photos/album" or self.mime_type == "photos/uncategorized"

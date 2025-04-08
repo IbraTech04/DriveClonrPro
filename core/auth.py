@@ -9,6 +9,7 @@ from typing import Optional
 DISCOVERY_SERVICE_URL = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'
 
 class GoogleAuth:
+
     def __init__(self, creds_path: str, scopes: list[str], logger: Optional[logging.Logger] = None) -> None:
         self.service = None
         self.creds_path = creds_path
@@ -36,7 +37,10 @@ class GoogleAuth:
             self.logger.exception(f"Authentication failed: {e}")
             return None
 
-    def build_new_service_from_creds(self):
+    def get_photos_service(self):
+        return build("photoslibrary", "v1", credentials=self.creds, static_discovery=False)
+
+    def build_new_service_from_creds(self, service_name: str = "drive", version: str = "v3"):
         """
         Builds a new service using the credentials.
         """
@@ -44,7 +48,7 @@ class GoogleAuth:
             raise ValueError("Cannot build service: no valid credentials found.")
 
         self.logger.info("Building new service from credentials...")
-        return build('drive', 'v3', credentials=self.creds, cache_discovery=False, discoveryServiceUrl=DISCOVERY_SERVICE_URL)
+        return build(service_name, version, credentials=self.creds, cache_discovery=False, discoveryServiceUrl=DISCOVERY_SERVICE_URL)
 
     def build_service(self, service_name: str, version: str, discovery_url: Optional[str] = None):
         """

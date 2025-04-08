@@ -50,3 +50,7 @@ class AppController(tk.Tk):
     def show_download_screen(self, service, config, log_file = open("download.log", "w")):
         self.clear_screen()
         DriveDownloadScreen(self.container, self, service, config, log_file).pack(fill="both", expand=True)
+    
+    def show_main_screen(self):
+        self.clear_screen()
+        TreeSelectorScreen(self.container, self, self.auth).pack(fill="both", expand=True)
