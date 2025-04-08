@@ -10,6 +10,7 @@ DISCOVERY_SERVICE_URL = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/r
 
 class GoogleAuth:
     def __init__(self, creds_path: str, scopes: list[str], logger: Optional[logging.Logger] = None) -> None:
+        self.service = None
         self.creds_path = creds_path
         self.scopes = scopes
         self.logger = logger or logging.getLogger(__name__)
@@ -35,6 +36,16 @@ class GoogleAuth:
             self.logger.exception(f"Authentication failed: {e}")
             return None
 
+    def build_new_service_from_creds(self):
+        """
+        Builds a new service using the credentials.
+        """
+        if not self.creds or not self.creds.valid:
+            raise ValueError("Cannot build service: no valid credentials found.")
+
+        self.logger.info("Building new service from credentials...")
+        return build('drive', 'v3', credentials=self.creds, cache_discovery=False, discoveryServiceUrl=DISCOVERY_SERVICE_URL)
+
     def build_service(self, service_name: str, version: str, discovery_url: Optional[str] = None):
         """
         Returns an authorized API client service instance.
@@ -43,9 +54,10 @@ class GoogleAuth:
             raise ValueError("Cannot build service: no valid credentials found.")
 
         self.logger.info(f"Building service: {service_name} v{version}")
-        return build(
+        self.service = build(
             service_name,
             version,
             credentials=self.creds,
             discoveryServiceUrl=discovery_url
         ) if discovery_url else build(service_name, version, credentials=self.creds)
+        return self.service

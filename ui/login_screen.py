@@ -28,6 +28,6 @@ class LoginScreen(tk.Frame):
             auth = GoogleAuth("assets/creds.json", SCOPES)
             creds = auth.authenticate()
             service = auth.build_service("drive", "v3", discovery_url=DISCOVERY_SERVICE_URL)
-            self.controller.show_tree_selector(service)
+            self.controller.show_tree_selector(auth)
         except Exception as e:
             self.status.config(text=f"Login failed: {e}")

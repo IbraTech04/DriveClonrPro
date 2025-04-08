@@ -8,36 +8,25 @@ from core.utils import check_windows_registry_longpath
 from core.model.clonr_config import ClonrConfig
 import platform
 
+# from ui.controller import AppController
+
 
 class ConfigScreen(tk.Frame):
+
+    # controller: AppController
+
     def __init__(self, parent, controller, service, config: ClonrConfig):
         super().__init__(parent)
         self.controller = controller
-        self.service = service
+        self.auth = service
         self.config = config
 
         ttk.Label(self, text="Configure Clonr Settings", font=("Helvetica", 16, "bold")).pack(pady=10)
         ttk.Label(self, text="Select export options and source folders", font=("Helvetica", 12)).pack()
 
-        # self.init_source_section()
         self.init_export_section()
         self.init_destination_section()
         self.init_buttons()
-
-    def init_source_section(self):
-        self.source_frame = ttk.LabelFrame(self, text="What to Clone")
-        self.source_frame.pack(fill="x", padx=10, pady=10)
-
-        self.my_drive = tk.BooleanVar(value=True)
-        self.shared = tk.BooleanVar()
-        self.trashed = tk.BooleanVar()
-        self.photos = tk.BooleanVar()
-
-        ttk.Checkbutton(self.source_frame, text="My Drive", variable=self.my_drive).pack(anchor="w")
-        ttk.Checkbutton(self.source_frame, text="Shared with Me", variable=self.shared).pack(anchor="w")
-        ttk.Checkbutton(self.source_frame, text="Trash", variable=self.trashed).pack(anchor="w")
-        ttk.Checkbutton(self.source_frame, text="Google Photos (Coming Soon)", variable=self.photos, state="disabled").pack(anchor="w")
-
 
     def init_export_section(self):
         self.export_frame = ttk.LabelFrame(self, text="Export Formats for Google Workspace Files")
@@ -88,7 +77,7 @@ class ConfigScreen(tk.Frame):
             return
 
         # Check if there's enough space
-        drive_size = int(self.service.about().get(fields="storageQuota").execute()["storageQuota"]["usage"])
+        drive_size = int(self.auth.service.about().get(fields="storageQuota").execute()["storageQuota"]["usage"])
         drive_size_gb = drive_size / (1024 ** 3)
         free_space_gb = shutil.disk_usage(dest)[2] / (1024 ** 3)
 
@@ -103,6 +92,8 @@ class ConfigScreen(tk.Frame):
         }
 
         print("Config:", self.config)
+
+        self.controller.show_download_screen(self.auth, self.config)
 
         # print("✅ Config validated. Proceeding...")
         # from ui.ready_screen import ReadyToStartScreen

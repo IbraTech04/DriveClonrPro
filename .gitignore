@@ -6,3 +6,4 @@ output/*
 bypasser.py
 response.json
 */__pycache__/
+*.log

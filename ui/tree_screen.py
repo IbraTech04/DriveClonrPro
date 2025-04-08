@@ -3,16 +3,20 @@
 import tkinter as tk
 from tkinter import ttk
 from ttkwidgets import CheckboxTreeview
+from core.auth import GoogleAuth
 from core.model.clonr_config import ClonrConfig
 from core.tree_builder import build_drive_tree
 from core.model.tree_node import DriveNode
 from core.utils import prune_checked_nodes
 
 class TreeSelectorScreen(tk.Frame):
-    def __init__(self, parent, controller, service):
+
+    auth: GoogleAuth
+
+    def __init__(self, parent, controller, service: GoogleAuth):
         super().__init__(parent)
         self.controller = controller
-        self.service = service
+        self.auth = service
         self.node_map = {}
 
         ttk.Label(self, text="Select Files to Clone", font=("Helvetica", 16, "bold")).pack(pady=10)
@@ -30,11 +34,12 @@ class TreeSelectorScreen(tk.Frame):
         ttk.Button(self, text="Next ➡️", command=self.print_selection).pack(pady=10)
 
     def query(self, q):
-        return self.service.files().list(
-            q=q,
+        return self.auth.service.files().list(
+            q=f"({q}) and mimeType != 'application/vnd.google-apps.form'",
             pageSize=1000,
             fields="files(id, name, mimeType, parents, owners)"
         ).execute().get("files", [])
+
 
     def insert_drive_node(self, node: DriveNode, parent_id: str):
         tree_id = self.tree.insert(parent_id, "end", text=node.name)
@@ -72,6 +77,6 @@ class TreeSelectorScreen(tk.Frame):
             return
 
         config = ClonrConfig(selected_root=pruned_root)
-        self.controller.show_config_screen(self.service, config)
+        self.controller.show_config_screen(self.auth, config)
 
 
