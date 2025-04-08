@@ -1,7 +1,10 @@
 # DriveClonrPro
+
 The BEST way to clone your Google Drive files to your computer.
+
 ## About DriveClonrPro
-Alas! The successor to the absolute mess of a codebase known as DriveClonr has emerged! Oh, and it has a GUI now ^_^. DriveClonr was a MESS due to the timecrunch I built it under; Long story short I found a bug with how I was using the NextPageTokens and fixing it required a lot of code rewriting. Since my school Google Drive was at risk of being disabled at any moment, I took the lazy approach and wrote really basic patches to get by.... patches that remain to this day. I had plans to fix DriveClonr but never got around to it, until now! 
+
+Alas! The successor to the absolute mess of a codebase known as DriveClonr has emerged! Oh, and it has a GUI now ^_^. DriveClonr was a MESS due to the time-crunch I built it under; Long-story-short: I found a bug with how I was using `NextPageTokens` and fixing it required a lot of code rewriting. Since my school Google Drive was at risk of being disabled at any moment, I took the lazy approach and wrote really basic patches to get by.... patches that remain to this day. I had plans to fix DriveClonr but never got around to it, until now!
 
 DriveClonrPro is a new take on the DriveClonr legacy, adding a GUI, proper OOP design, and a lot of other cool stuff. It's still in development, but it's already a lot better (and more importantly, stable) than DriveClonr.
 
@@ -40,7 +43,7 @@ Coming Soon: A proper TreeView widget that allows the user to select which folde
 
 ## How does DriveClonrPro work?
 
-Simply put, I treat the Google Drive file structure like a massive tree and recurse through it using Postorder traversal, creating each folder as I recurse deeper. This would normally be a fast process, however each level of recursion requires a new call to the Google Drive API which slows down the process. 
+Simply put, I treat the Google Drive file structure like a massive tree and recurse through it using Postorder traversal, creating each folder as I recurse deeper. This would normally be a fast process, however each level of recursion requires a new call to the Google Drive API which slows down the process.
 
 I'm not sure why I chose postorder traversal, but it works so I'm not complaining :shrug:. In hindsight I should've used level-order traversal, but if it works, it works.
 
@@ -52,7 +55,7 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 ## Features
 
 1. Auto LongFilePaths enabler on Windows
-    - To avoid complex recursive file-path size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit (Unix go brrr). 
+    - To avoid complex recursive file-path size trimming, DriveClonrPro automatically enables the LongFilePaths registry key on Windows. This allows DriveClonrPro to clone files with long file names without any issues. This feature is only available on Windows, as macOS and Linux do not have a file name length limit (Unix go brrr).
 
 2. Unmatched Google Workspace Support
     - New with DriveClonrPro is the ability to specify what each type of Google Workspace document is converted to. For example, you can choose to convert all Google Docs to Microsoft Word documents and all Google Sheets to PDF documents. Unlike the legacy DriveClonr, you're no longer stuck with either-or.
@@ -64,7 +67,7 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
     - A feature completely in the control of Tkinter and Python, I'm taking credit for it regardless :P. DriveClonrPro is cross-platform, meaning it works on Windows, macOS, and Linux. Granted, I've only tested it on Windows, but by PSMI (Pure Software MagIc™) it should work on macOS and Linux as well.
 
 5. Complete filesize support
-    - Unlike its predecessor, DriveClonrPro supports cloning files of any size - Specifically exported Google Workspace documents. Whereas DriveClonr would have failed at cloning the file, DriveClonrPro is able to use export links to bypass the export limit and clone the file. 
+    - Unlike its predecessor, DriveClonrPro supports cloning files of any size - Specifically exported Google Workspace documents. Whereas DriveClonr would have failed at cloning the file, DriveClonrPro is able to use export links to bypass the export limit and clone the file.
 
 ## Planned Features
 
