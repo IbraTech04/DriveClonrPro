@@ -3,10 +3,9 @@ from tkinter import ttk
 from threading import Thread, Lock
 from core.drive_downloadr import walk_drive_tree, run_download_worker, DownloadStats
 from queue import Queue
-import time
 
 class DriveDownloadScreen(tk.Frame):
-    def __init__(self, parent, controller, service, config, log_file, num_threads=8):
+    def __init__(self, parent, controller, service, config, log_file, num_threads=4):
         super().__init__(parent)
         self.controller = controller
         self.auth = service
