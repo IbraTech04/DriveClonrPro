@@ -4,9 +4,11 @@ The BEST way to clone your Google Drive files to your computer.
 
 ## About DriveClonrPro
 
-Alas! The successor to the absolute mess of a codebase known as DriveClonr has emerged! Oh, and it has a GUI now ^_^. DriveClonr was a MESS due to the time-crunch I built it under; Long-story-short: I found a bug with how I was using `NextPageTokens` and fixing it required a lot of code rewriting. Since my school Google Drive was at risk of being disabled at any moment, I took the lazy approach and wrote really basic patches to get by.... patches that remain to this day. I had plans to fix DriveClonr but never got around to it, until now!
+Alas! The successor to the absolute mess of a codebase known as DriveClonr has emerged! Oh, and it has a GUI now ^_^. DriveClonr was a MESS due to the time-crunch I built it under. 
 
-DriveClonrPro is a new take on the DriveClonr legacy, adding a GUI, proper OOP design, and a lot of other cool stuff. It's still in development, but it's already a lot better (and more importantly, stable) than DriveClonr.
+> Long-story-short: I found a bug with how I was using `NextPageTokens` and fixing it required a lot of code rewriting. Since my school Google Drive was at risk of being disabled at any moment, I took the lazy approach and wrote really basic patches to get by.... patches that remain to this day. I had plans to fix DriveClonr but never got around to it, until now!
+
+DriveClonrPro is a new take on the DriveClonr legacy, adding a GUI, proper OOP design, and a lot of other cool QoL features. DriveClonrPro is a complete rewrite of the original DriveClonr codebase, and as such, it is a lot cleaner and easier to use. I also took the time to add a lot of new features that were requested by users of the original DriveClonr! 
 
 ## What happened to the `e` in DriveClon(e)rPro?
 
@@ -49,8 +51,8 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 
 ## Known Issues
 
-1. Tkinter seems to not like the cloning screen; The layout of the objects moves around a lot when the length of the file name changes. This is something I aim to rectify in the future.
-2. The UI doesn't scale properly; it becomes blurry when scaled up. This is probably an issue with Tkinter that I don't think I can fix easily
+- Shared files ONLY show up in the "Shared with me" section of the cloned drive, even if they are in a folder in the original drive. As far as I can tell, this is a limitation of the Google Drive API. I will be looking into this in the future, but for now, this is how it works.
+- The program may be vulnerable to race conditions, as I have not fully vetted the multithreading code yet. I will be looking into this in the future, but for now it seems to work fine. If you encounter any issues, please let me know and I will do my best to fix them.
 
 ## Features
 
@@ -68,6 +70,12 @@ I'm not sure why I chose postorder traversal, but it works so I'm not complainin
 
 5. Complete filesize support
     - Unlike its predecessor, DriveClonrPro supports cloning files of any size - Specifically exported Google Workspace documents. Whereas DriveClonr would have failed at cloning the file, DriveClonrPro is able to use export links to bypass the export limit and clone the file.
+
+6. Maximum File Size Bypass
+    - DriveClonrPro is able to bypass the maximum file size limit for exporting Google Workspace documents through the API. This means that you can clone files of any size, as long as they are Google Workspace documents. This is a feature that I wanted to add to DriveClonr, but I never got around to it. I'm glad to finally be able to implement it.
+
+7. Complete Multithreading Support
+    - DriveClonrPro is able to clone files in parallel, meaning that it can clone multiple files at once. This makes the cloning process a lot faster, especially for large files. This is a feature that I wanted to add to DriveClonr, but I never got around to it. I'm glad to finally be able to implement it.
 
 ## Planned Features
 

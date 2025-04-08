@@ -7,7 +7,7 @@ GOOGLE_WORKSPACE_MIMETYPES = {
 }
 
 EXPORT_OPTIONS = {
-    "application/vnd.google-apps.document": ["PDF", "Word", "OpenOffice Writer"],
+    "application/vnd.google-apps.document": ["Word", "PDF" "OpenOffice Writer", "Plain Text", "HTML", "Markdown", "RTF"],
     "application/vnd.google-apps.spreadsheet": ["PDF", "Excel", "OpenOffice Calc"],
     "application/vnd.google-apps.presentation": ["PDF", "PowerPoint", "OpenOffice Impress"],
     "application/vnd.google-apps.drawing": ["PNG", "PDF", "JPEG", "SVG"],
@@ -26,7 +26,12 @@ EXPORT_MIMETYPES = {
     "Plain Text": "text/plain",
     "OpenOffice Writer": "application/vnd.oasis.opendocument.text",
     "OpenOffice Calc": "application/vnd.oasis.opendocument.spreadsheet",
-    "OpenOffice Impress": "application/vnd.oasis.opendocument.presentation"
+    "OpenOffice Impress": "application/vnd.oasis.opendocument.presentation",
+    "Markdown": "text/markdown",
+    "RTF": "application/rtf",
+    "HTML": "text/html",
+    "RTF": "application/rtf",
+    "Plain Text": "text/plain",
 }
 
 MIMETYPE_EXTENSIONS = {
@@ -39,7 +44,11 @@ MIMETYPE_EXTENSIONS = {
     "image/svg+xml": ".svg", 
     "application/vnd.oasis.opendocument.text": ".odt", 
     "application/vnd.oasis.opendocument.spreadsheet": ".ods", 
-    "application/vnd.oasis.opendocument.presentation": ".odp"
+    "application/vnd.oasis.opendocument.presentation": ".odp",
+    "text/html": ".html",
+    "text/plain": ".txt",
+    "text/markdown": ".md",
+    "application/rtf": ".rtf",
 }
 
 # MIMETYPE_TO_EXPORT_LINK = {
