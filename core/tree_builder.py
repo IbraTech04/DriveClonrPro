@@ -1,3 +1,4 @@
+from typing import Dict, List
 from core.model.tree_node import DriveNode, PhotosNode
 
 def build_drive_tree(my_files: list[dict], shared_files: list[dict], trash_files: list[dict]) -> DriveNode:
@@ -65,23 +66,47 @@ def build_subtree_drive(file_list: list[dict], label: str) -> DriveNode:
     """
     Builds a tree from a flat file list and returns a labeled root node.
     """
-    id_to_node = {}
-    children_map = {}
+    if not file_list:
+        return None
+        
+    id_to_node: Dict[str, DriveNode] = {}
+    children_map: Dict[str, List[DriveNode]] = {}
+    orphans: List[DriveNode] = []
 
     # Step 1: Create nodes
     for file in file_list:
-        node = DriveNode(file['id'], file['name'], file['mimeType'])
-        id_to_node[file['id']] = node
-        for parent_id in file.get('parents', []):
-            children_map.setdefault(parent_id, []).append(node)
+        file_id = file.get('id')
+        if not file_id:
+            continue
+            
+        node = DriveNode(file_id, file.get('name', 'Unnamed'), 
+                         file.get('mimeType', 'application/octet-stream'))
+        id_to_node[file_id] = node
+        
+        parents = file.get('parents', [])
+        if parents:
+            for parent_id in parents:
+                children_map.setdefault(parent_id, []).append(node)
+        else:
+            orphans.append(node)
 
+    # Create root for this subtree
     root = DriveNode(label.lower() + "-root", label, "application/vnd.google-apps.folder")
 
     # Step 2: Link children to parents
     for parent_id, children in children_map.items():
-        parent_node = id_to_node.get(parent_id, root)
-        for child in children:
-            parent_node.add_child(child)
+        parent_node = id_to_node.get(parent_id)
+        if parent_node:
+            for child in children:
+                parent_node.add_child(child)
+        else:
+            # Parent not in our list, attach to root
+            for child in children:
+                root.add_child(child)
+    
+    # Add orphans to root
+    for node in orphans:
+        root.add_child(node)
 
     return root
 
