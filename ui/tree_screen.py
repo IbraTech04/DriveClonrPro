@@ -121,9 +121,9 @@ class TreeSelectorScreen(tk.Frame):
             
         return files
 
-
-
     def insert_drive_node(self, node: DownloadableNode, parent_id: str):
+        if node is None:
+            return
         tree_id = self.tree.insert(parent_id, "end", text=node.name)
         self.node_map[tree_id] = node
         for child in node.children:

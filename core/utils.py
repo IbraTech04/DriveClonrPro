@@ -35,6 +35,8 @@ def prune_checked_nodes(node: DownloadableNode) -> bool:
       True if this node should be kept (i.e. it is checked or it has any remaining children),
       and False if it should be pruned.
     """
+    if not node:
+        return False
     # Process children recursively and filter out those that should be pruned.
     new_children = []
     for child in node.children:
